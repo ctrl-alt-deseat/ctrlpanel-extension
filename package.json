@@ -1,0 +1,31 @@
+{
+  "name": "@ctrlpanel/extension",
+  "version": "0.0.0",
+  "license": "UNLICENSED",
+  "repository": "ctrl-alt-deseat/ctrlpanel-extension",
+  "scripts": {
+    "build:production": "NODE_ENV=production webpack",
+    "build:dev": "NODE_ENV=development webpack",
+    "build:watch": "NODE_ENV=development webpack --watch",
+    "start:firefox": "web-ext run --source-dir distribution",
+    "dev:firefox": "npm-run-all build:dev --parallel build:watch start:firefox",
+    "release:firefox": "web-ext build --source-dir distribution",
+    "release": "run-s build:production release:firefox"
+  },
+  "dependencies": {
+    "@buttercup/locust": "^0.1.1",
+    "@ctrlpanel/core": "^0.2.0",
+    "ts-unwrap": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/firefox-webext-browser": "^58.0.1",
+    "copy-webpack-plugin": "^4.3.1",
+    "generate-json-webpack-plugin": "^0.2.2",
+    "npm-run-all": "^4.1.2",
+    "ts-loader": "^3.2.0",
+    "typescript": "^2.6.2",
+    "utc-version": "^1.0.0",
+    "web-ext": "^2.3.1",
+    "webpack": "^3.10.0"
+  }
+}

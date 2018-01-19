@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      background-color: #fff;
+      font-family: -apple-system,BlinkMacSystemFont,sans-serif;
+    }
+
+    body {
+      min-width: 224px;
+    }
+
+    .unlock-container,
+    .status-container {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .unlock-form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .unlock-message,
+    .status-message {
+      text-align: center;
+      font-size: 10px;
+    }
+
+    .unlock-error {
+      color: red;
+      text-align: center;
+      font-size: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="unlock-container">
+    <div class="unlock-message">Enter master password to unlock</div>
+    <div style="height: 12px; width: 1px;"></div>
+    <form class="unlock-form"><input class="unlock-input" type="password" autofocus /></form>
+    <div style="height: 12px; width: 1px;"></div>
+    <div class="unlock-error"></div>
+  </div>
+
+  <div class="status-container" style="display: none;">
+    <div class="status-message"></div>
+  </div>
+
+  <script src="/popup.js"></script>
+</body>
+</html>
