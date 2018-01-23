@@ -3,12 +3,8 @@ interface Window {
 }
 
 declare module '@buttercup/locust' {
-  function getLoginTarget(): {
+  export function getLoginTarget(): {
     login (username: string, password: string): Promise<void>
     enterDetails (username: string, password: string): Promise<void>
   }
-
-  const Locust: { getLoginTarget: typeof getLoginTarget }
-
-  export default Locust
 }
