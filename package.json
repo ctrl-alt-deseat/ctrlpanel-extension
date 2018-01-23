@@ -15,6 +15,7 @@
   "dependencies": {
     "@buttercup/locust": "^0.3.0",
     "@ctrlpanel/core": "^0.2.0",
+    "@wext/tabs": "^0.1.0",
     "ts-unwrap": "^1.0.0"
   },
   "devDependencies": {
