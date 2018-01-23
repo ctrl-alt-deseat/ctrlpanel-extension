@@ -6,15 +6,19 @@
   "scripts": {
     "build:prod:firefox": "NODE_ENV=production TARGET_BROWSER=firefox webpack",
     "build:prod:chrome": "NODE_ENV=production TARGET_BROWSER=chrome webpack",
+    "build:prod:opera": "NODE_ENV=production TARGET_BROWSER=opera webpack",
     "build:dev:firefox": "NODE_ENV=development TARGET_BROWSER=firefox webpack",
     "build:dev:chrome": "NODE_ENV=development TARGET_BROWSER=chrome webpack",
+    "build:dev:opera": "NODE_ENV=development TARGET_BROWSER=opera webpack",
     "build:watch:firefox": "NODE_ENV=development TARGET_BROWSER=firefox webpack --watch",
     "build:watch:chrome": "NODE_ENV=development TARGET_BROWSER=chrome webpack --watch",
+    "build:watch:opera": "NODE_ENV=development TARGET_BROWSER=opera webpack --watch",
     "start:firefox": "web-ext run --source-dir distribution/firefox",
     "dev:firefox": "npm-run-all build:dev:firefox --parallel build:watch:firefox start:firefox",
     "release:firefox": "web-ext build --source-dir distribution/firefox --artifacts-dir web-ext-artifacts/firefox",
     "release:chrome": "web-ext build --source-dir distribution/chrome --artifacts-dir web-ext-artifacts/chrome",
-    "release": "run-s build:prod:firefox release:firefox build:prod:chrome release:chrome"
+    "release:opera": "web-ext build --source-dir distribution/opera --artifacts-dir web-ext-artifacts/opera",
+    "release": "run-s build:prod:firefox release:firefox build:prod:chrome release:chrome build:prod:opera release:opera"
   },
   "dependencies": {
     "@buttercup/locust": "^0.3.0",
