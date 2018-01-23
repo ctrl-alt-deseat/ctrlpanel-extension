@@ -4,13 +4,17 @@
   "license": "UNLICENSED",
   "repository": "ctrl-alt-deseat/ctrlpanel-extension",
   "scripts": {
-    "build:production": "NODE_ENV=production webpack",
-    "build:dev": "NODE_ENV=development webpack",
-    "build:watch": "NODE_ENV=development webpack --watch",
-    "start:firefox": "web-ext run --source-dir distribution",
-    "dev:firefox": "npm-run-all build:dev --parallel build:watch start:firefox",
-    "release:firefox": "web-ext build --source-dir distribution",
-    "release": "run-s build:production release:firefox"
+    "build:prod:firefox": "NODE_ENV=production TARGET_BROWSER=firefox webpack",
+    "build:prod:chrome": "NODE_ENV=production TARGET_BROWSER=chrome webpack",
+    "build:dev:firefox": "NODE_ENV=development TARGET_BROWSER=firefox webpack",
+    "build:dev:chrome": "NODE_ENV=development TARGET_BROWSER=chrome webpack",
+    "build:watch:firefox": "NODE_ENV=development TARGET_BROWSER=firefox webpack --watch",
+    "build:watch:chrome": "NODE_ENV=development TARGET_BROWSER=chrome webpack --watch",
+    "start:firefox": "web-ext run --source-dir distribution/firefox",
+    "dev:firefox": "npm-run-all build:dev:firefox --parallel build:watch:firefox start:firefox",
+    "release:firefox": "web-ext build --source-dir distribution/firefox --artifacts-dir web-ext-artifacts/firefox",
+    "release:chrome": "web-ext build --source-dir distribution/chrome --artifacts-dir web-ext-artifacts/chrome",
+    "release": "run-s build:prod:firefox release:firefox build:prod:chrome release:chrome"
   },
   "dependencies": {
     "@buttercup/locust": "^0.3.0",
@@ -23,6 +27,7 @@
     "copy-webpack-plugin": "^4.3.1",
     "generate-json-webpack-plugin": "^0.2.2",
     "npm-run-all": "^4.1.2",
+    "rsvg-webpack-plugin": "^1.0.0",
     "ts-loader": "^3.2.0",
     "typescript": "^2.6.2",
     "utc-version": "^1.0.0",
