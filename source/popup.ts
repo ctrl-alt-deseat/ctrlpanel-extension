@@ -55,8 +55,11 @@ if (hasSafariGlobal) {
   window.addEventListener('blur', () => {
     setTimeout(() => {
       safari.self.height = originalHeight
-      window.location.reload()
-    }, 1200)
+      unlockInput.value = ''
+      unlockContainer.style.display = 'none'
+      statusContainer.style.display = 'none'
+      errorContainer.style.display = 'none'
+    }, 280)
   })
 
   window.addEventListener('focus', async () => {
@@ -143,6 +146,9 @@ unlockForm.addEventListener('submit', async (ev) => {
       throw err
     }
   }
+
+  // The password was correct, remove it from the DOM now
+  unlockInput.value = ''
 
   if (state.kind === 'unlocked') {
     statusMessage.textContent = 'Connecting...'
