@@ -1,9 +1,13 @@
+/* global safari */
+
 import unwrap = require('ts-unwrap')
 
 import CtrlpanelCore, { State } from '@ctrlpanel/core'
 import * as wextTabs from '@wext/tabs'
 
 import { API_HOST, APP_HOST, AUTO_SUBMIT } from './config'
+
+const hasSafariGlobal = (typeof safari === 'object')
 
 const unlockContainer = unwrap(document.querySelector<HTMLDivElement>('div.unlock-container'))
 const unlockForm = unwrap(document.querySelector<HTMLFormElement>('form.unlock-form'))
@@ -16,6 +20,7 @@ const statusMessage = unwrap(document.querySelector<HTMLDivElement>('div.status-
 setTimeout(() => unlockInput.focus(), 200)
 
 const core = new CtrlpanelCore(API_HOST)
+const originalHeight = document.body.clientHeight
 
 let state: State = core.init()
 
@@ -29,6 +34,25 @@ function waitForComplete (targetTabId: number) {
     })
   })
 }
+
+function refreshPopupHeight () {
+  if (hasSafariGlobal) safari.self.height = document.body.clientHeight
+}
+
+function hidePopup () {
+  return (hasSafariGlobal ? safari.self.hide() : window.close())
+}
+
+// Safari doesn't reset the popup when it closes
+if (hasSafariGlobal) {
+  window.addEventListener('blur', () => {
+    setTimeout(() => {
+      safari.self.height = originalHeight
+      window.location.reload()
+    }, 1200)
+  })
+}
+
 unlockForm.addEventListener('submit', async (ev) => {
   ev.preventDefault()
 
@@ -37,6 +61,9 @@ unlockForm.addEventListener('submit', async (ev) => {
   unlockContainer.style.display = 'none'
   statusContainer.style.display = ''
   unlockError.textContent = ''
+  statusMessage.textContent = 'Loading...'
+
+  refreshPopupHeight()
 
   if (state.kind === 'empty') {
     statusMessage.textContent = 'Fetching credentials...'
@@ -68,6 +95,8 @@ unlockForm.addEventListener('submit', async (ev) => {
         unlockContainer.style.display = ''
         statusContainer.style.display = 'none'
         unlockError.textContent = 'Wrong master password'
+        refreshPopupHeight()
+        return
       }
 
       throw err
@@ -88,9 +117,9 @@ unlockForm.addEventListener('submit', async (ev) => {
 
   const data = core.getParsedEntries(state)
   const accounts = Object.keys(data.accounts).map(key => data.accounts[key])
-  const facebook = accounts.find(acc => acc.hostname.replace('www.', '') === hostname)
+  const account = accounts.find(acc => acc.hostname.replace('www.', '') === hostname)
 
-  if (!facebook) {
+  if (!account) {
     statusMessage.textContent = 'No account found'
     return
   }
@@ -99,11 +128,11 @@ unlockForm.addEventListener('submit', async (ev) => {
 
   try {
     await wextTabs.executeScript({ file: '/filler.js' })
-    await wextTabs.executeScript({ code: `window.__ctrlpanel_extension_perform_login__(${JSON.stringify(facebook.handle)}, ${JSON.stringify(facebook.password)}, ${JSON.stringify(AUTO_SUBMIT)})` })
+    await wextTabs.executeScript({ code: `window.__ctrlpanel_extension_perform_login__(${JSON.stringify(account.handle)}, ${JSON.stringify(account.password)}, ${JSON.stringify(AUTO_SUBMIT)})` })
   } catch (_) {
     statusMessage.textContent = 'Failed to fill'
     return
   }
 
-  window.close()
+  hidePopup()
 })

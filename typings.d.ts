@@ -8,3 +8,10 @@ declare module '@buttercup/locust' {
     enterDetails (username: string, password: string): Promise<void>
   }
 }
+
+declare const safari: {
+  self: {
+    height: number
+    hide: () => void
+  }
+}

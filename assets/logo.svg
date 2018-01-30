@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="64px" height="64px" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <path fill="#000000" d="M 32 35 C 32 35, 46 52, 40 56 C 36 60, 28 60, 24 56 C 18 52, 32 35, 32 35" transform="rotate(  0 32 32)" />
-  <path fill="#000000" d="M 32 35 C 32 35, 46 52, 40 56 C 36 60, 28 60, 24 56 C 18 52, 32 35, 32 35" transform="rotate( 72 32 32)" />
-  <path fill="#000000" d="M 32 35 C 32 35, 46 52, 40 56 C 36 60, 28 60, 24 56 C 18 52, 32 35, 32 35" transform="rotate(144 32 32)" />
-  <path fill="#000000" d="M 32 35 C 32 35, 46 52, 40 56 C 36 60, 28 60, 24 56 C 18 52, 32 35, 32 35" transform="rotate(216 32 32)" />
-  <path fill="#000000" d="M 32 35 C 32 35, 46 52, 40 56 C 36 60, 28 60, 24 56 C 18 52, 32 35, 32 35" transform="rotate(288 32 32)" />
+<svg width="64px" height="64px" viewBox="5 5 54 54" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path fill="$PRIMARY_COLOR" d="M 32 35 C 32 35, 46 52, 40 56 C 36 60, 28 60, 24 56 C 18 52, 32 35, 32 35" transform="rotate(  0 32 32)" />
+  <path fill="$PRIMARY_COLOR" d="M 32 35 C 32 35, 46 52, 40 56 C 36 60, 28 60, 24 56 C 18 52, 32 35, 32 35" transform="rotate( 72 32 32)" />
+  <path fill="$PRIMARY_COLOR" d="M 32 35 C 32 35, 46 52, 40 56 C 36 60, 28 60, 24 56 C 18 52, 32 35, 32 35" transform="rotate(144 32 32)" />
+  <path fill="$PRIMARY_COLOR" d="M 32 35 C 32 35, 46 52, 40 56 C 36 60, 28 60, 24 56 C 18 52, 32 35, 32 35" transform="rotate(216 32 32)" />
+  <path fill="$PRIMARY_COLOR" d="M 32 35 C 32 35, 46 52, 40 56 C 36 60, 28 60, 24 56 C 18 52, 32 35, 32 35" transform="rotate(288 32 32)" />
 </svg>
