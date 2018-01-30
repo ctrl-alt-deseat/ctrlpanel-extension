@@ -16,7 +16,6 @@ const unlockInput = unwrap(document.querySelector<HTMLInputElement>('input.unloc
 const unlockError = unwrap(document.querySelector<HTMLDivElement>('div.unlock-error'))
 
 const statusContainer = unwrap(document.querySelector<HTMLDivElement>('div.status-container'))
-const statusMessage = unwrap(document.querySelector<HTMLDivElement>('div.status-message'))
 
 const errorContainer = unwrap(document.querySelector<HTMLDivElement>('div.error-container'))
 const errorMessage = unwrap(document.querySelector<HTMLDivElement>('div.error-message'))
@@ -114,13 +113,10 @@ unlockForm.addEventListener('submit', async (ev) => {
   unlockContainer.style.display = 'none'
   statusContainer.style.display = ''
   unlockError.textContent = ''
-  statusMessage.textContent = 'Loading...'
 
   refreshPopupHeight()
 
   if (state.kind === 'empty') {
-    statusMessage.textContent = 'Fetching credentials...'
-
     const tab = unwrap(await wextTabs.create({ active: false, url: `${APP_HOST}/#login` }))
     const tabId = unwrap(tab.id)
 
@@ -129,9 +125,8 @@ unlockForm.addEventListener('submit', async (ev) => {
     const syncToken = unwrap(await wextTabs.executeScript(tabId, { code: 'window.localStorage.getItem("credentials")' }))[0] as string | undefined
 
     if (!syncToken) {
-      statusMessage.textContent = 'Please log in to Ctrlpanel'
       await wextTabs.update(tabId, { active: true })
-      return
+      return displayError('Please log in to Ctrlpanel')
     }
 
     await wextTabs.remove(tabId)
@@ -141,7 +136,6 @@ unlockForm.addEventListener('submit', async (ev) => {
 
   if (state.kind === 'locked') {
     try {
-      statusMessage.textContent = 'Unlocking...'
       state = await core.unlock(state, masterPassword)
     } catch (err) {
       if (err.code === 'WRONG_MASTER_PASSWORD') {
@@ -160,14 +154,11 @@ unlockForm.addEventListener('submit', async (ev) => {
   unlockInput.value = ''
 
   if (state.kind === 'unlocked') {
-    statusMessage.textContent = 'Connecting...'
     state = await core.connect(state)
   }
 
-  statusMessage.textContent = 'Syncing...'
   state = await core.sync(state)
 
-  statusMessage.textContent = 'Findind account...'
   const tab = (await wextTabs.query({ active: true, currentWindow: true }))[0]
   const hostname = (new URL(unwrap(tab.url))).hostname.replace(reCommonPrefixes, '')
 
@@ -179,13 +170,10 @@ unlockForm.addEventListener('submit', async (ev) => {
     return displayError('No account found')
   }
 
-  statusMessage.textContent = 'Filling...'
-
   try {
     await wextTabs.executeScript({ code: `window.__ctrlpanel_extension_perform_login__(${JSON.stringify(account.handle)}, ${JSON.stringify(account.password)}, ${JSON.stringify(AUTO_SUBMIT)})` })
   } catch (_) {
-    statusMessage.textContent = 'Failed to fill'
-    return
+    return displayError('Failed to fill')
   }
 
   hidePopup()

@@ -96,6 +96,7 @@ module.exports = {
     ]),
     new CopyWebpackPlugin([
       ...shims,
+      { from: 'spinner.svg', context: 'assets' },
       { from: 'popup.html', context: 'views' }
     ])
   ]
