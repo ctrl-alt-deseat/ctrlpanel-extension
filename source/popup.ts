@@ -86,6 +86,10 @@ async function onPopupOpen () {
     return displayError('Not on sign in page')
   }
 
+  if (tab.url.startsWith('about:')) {
+    return displayError('Not on sign in page')
+  }
+
   const hostname = (new URL(tab.url)).hostname.replace(reCommonPrefixes, '')
 
   unlockContainer.style.display = ''
