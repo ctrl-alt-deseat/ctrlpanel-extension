@@ -69,12 +69,25 @@ if (hasSafariGlobal) {
   onPopupOpen()
 }
 
+function displayError (message: string) {
+  unlockContainer.style.display = 'none'
+  statusContainer.style.display = 'none'
+  errorContainer.style.display = ''
+  errorMessage.textContent = message
+  refreshPopupHeight()
+}
+
 async function onPopupOpen () {
   unlockMesage.innerHTML = '&nbsp;'
   refreshPopupHeight()
 
   const tab = (await wextTabs.query({ active: true, currentWindow: true }))[0]
-  const hostname = (new URL(unwrap(tab.url))).hostname.replace(reCommonPrefixes, '')
+
+  if (!tab.url) {
+    return displayError('Not on sign in page')
+  }
+
+  const hostname = (new URL(tab.url)).hostname.replace(reCommonPrefixes, '')
 
   unlockContainer.style.display = ''
   unlockMesage.textContent = hostname.charAt(0).toUpperCase() + hostname.slice(1)
@@ -84,11 +97,7 @@ async function onPopupOpen () {
   const hasLogin = (await wextTabs.executeScript({ code: `window.__ctrlpanel_extension_has_login__()` }))[0]
 
   if (!hasLogin) {
-    unlockContainer.style.display = 'none'
-    errorContainer.style.display = ''
-    errorMessage.textContent = 'Not on sign in page'
-    refreshPopupHeight()
-    return
+    return displayError('Not on sign in page')
   }
 }
 
@@ -167,10 +176,7 @@ unlockForm.addEventListener('submit', async (ev) => {
   const account = accounts.find(acc => acc.hostname.replace(reCommonPrefixes, '') === hostname)
 
   if (!account) {
-    statusContainer.style.display = 'none'
-    errorContainer.style.display = ''
-    errorMessage.textContent = 'No account found'
-    return
+    return displayError('No account found')
   }
 
   statusMessage.textContent = 'Filling...'
