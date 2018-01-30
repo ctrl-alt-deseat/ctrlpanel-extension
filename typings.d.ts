@@ -1,4 +1,5 @@
 interface Window {
+  __ctrlpanel_extension_has_login__: () => boolean
   __ctrlpanel_extension_perform_login__: (username: string, password: string, submit: boolean) => void
 }
 
