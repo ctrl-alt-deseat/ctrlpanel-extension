@@ -22,6 +22,8 @@ const errorContainer = unwrap(document.querySelector<HTMLDivElement>('div.error-
 const errorMessage = unwrap(document.querySelector<HTMLDivElement>('div.error-message'))
 const errorAppLink = unwrap(document.querySelector<HTMLAnchorElement>('div.error-app-link a'))
 
+const reCommonPrefixes = /^(account|accounts|app|dashboard|login|signin|www)\./
+
 setTimeout(() => unlockInput.focus(), 200)
 
 const core = new CtrlpanelCore(API_HOST)
@@ -69,7 +71,7 @@ async function onPopupOpen () {
   refreshPopupHeight()
 
   const tab = (await wextTabs.query({ active: true, currentWindow: true }))[0]
-  const hostname = (new URL(unwrap(tab.url))).hostname.replace('www.', '')
+  const hostname = (new URL(unwrap(tab.url))).hostname.replace(reCommonPrefixes, '')
 
   unlockContainer.style.display = ''
   unlockMesage.textContent = hostname.charAt(0).toUpperCase() + hostname.slice(1)
@@ -152,11 +154,11 @@ unlockForm.addEventListener('submit', async (ev) => {
 
   statusMessage.textContent = 'Findind account...'
   const tab = (await wextTabs.query({ active: true, currentWindow: true }))[0]
-  const hostname = (new URL(unwrap(tab.url))).hostname.replace('www.', '')
+  const hostname = (new URL(unwrap(tab.url))).hostname.replace(reCommonPrefixes, '')
 
   const data = core.getParsedEntries(state)
   const accounts = Object.keys(data.accounts).map(key => data.accounts[key])
-  const account = accounts.find(acc => acc.hostname.replace('www.', '') === hostname)
+  const account = accounts.find(acc => acc.hostname.replace(reCommonPrefixes, '') === hostname)
 
   if (!account) {
     statusContainer.style.display = 'none'
