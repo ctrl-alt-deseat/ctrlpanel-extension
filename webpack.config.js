@@ -1,6 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 
+const restrictNodeStuff = require('webpack-restrict-node-stuff')
 const unwrap = require('ts-unwrap')
 const utcVersion = require('utc-version')
 const webpack = require('webpack')
@@ -71,52 +72,7 @@ module.exports = {
     path: path.join(__dirname, 'distribution', (targetBrowser === 'safari' ? 'safari.safariextension' : targetBrowser)),
     filename: '[name].js'
   },
-  node: {
-    // Enabled
-    global: true,
-
-    // Misc
-    console: false,
-    process: false,
-    Buffer: false,
-
-    // Modules
-    assert: false,
-    async_hooks: false,
-    buffer: false,
-    child_process: false,
-    cluster: false,
-    constants: false,
-    crypto: false,
-    dgram: false,
-    dns: false,
-    domain: false,
-    events: false,
-    fs: false,
-    http: false,
-    http2: false,
-    https: false,
-    inspector: false,
-    module: false,
-    net: false,
-    os: false,
-    path: false,
-    perf_hooks: false,
-    punycode: false,
-    querystring: false,
-    readline: false,
-    repl: false,
-    stream: false,
-    string_decoder: false,
-    timers: false,
-    tls: false,
-    tty: false,
-    url: false,
-    util: false,
-    v8: false,
-    vm: false,
-    zlib: false
-  },
+  node: restrictNodeStuff(['global']),
   resolve: {
     extensions: ['.ts', '.tsx', '.js']
   },
