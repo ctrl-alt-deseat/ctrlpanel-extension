@@ -7,11 +7,14 @@ import * as wextTabs from '@wext/tabs'
 
 import { API_HOST, APP_HOST, AUTO_SUBMIT } from './config'
 
+const EMPTY_IMAGE_SRC = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
+
 const hasSafariGlobal = (typeof safari === 'object')
 
 const unlockContainer = unwrap(document.querySelector<HTMLDivElement>('div.unlock-container'))
 const unlockForm = unwrap(document.querySelector<HTMLFormElement>('form.unlock-form'))
-const unlockMesage = unwrap(document.querySelector<HTMLDivElement>('div.unlock-message'))
+const unlockFavicon = unwrap(document.querySelector<HTMLImageElement>('img.unlock-favicon'))
+const unlockHostname = unwrap(document.querySelector<HTMLDivElement>('div.unlock-hostname'))
 const unlockInput = unwrap(document.querySelector<HTMLInputElement>('input.unlock-input'))
 const unlockError = unwrap(document.querySelector<HTMLDivElement>('div.unlock-error'))
 
@@ -77,7 +80,8 @@ function displayError (message: string) {
 }
 
 async function onPopupOpen () {
-  unlockMesage.innerHTML = '&nbsp;'
+  unlockFavicon.src = EMPTY_IMAGE_SRC
+  unlockHostname.innerHTML = '&nbsp;'
   refreshPopupHeight()
 
   const tab = (await wextTabs.query({ active: true, currentWindow: true }))[0]
@@ -93,7 +97,8 @@ async function onPopupOpen () {
   const hostname = (new URL(tab.url)).hostname.replace(reCommonPrefixes, '')
 
   unlockContainer.style.display = ''
-  unlockMesage.textContent = hostname.charAt(0).toUpperCase() + hostname.slice(1)
+  unlockFavicon.src = `https://api.ind3x.io/v1/domains/${hostname}/icon`
+  unlockHostname.textContent = hostname.charAt(0).toUpperCase() + hostname.slice(1)
   refreshPopupHeight()
 
   await wextTabs.executeScript({ file: '/filler.js' })

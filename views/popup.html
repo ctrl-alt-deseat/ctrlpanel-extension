@@ -33,10 +33,15 @@
       flex-direction: column;
     }
 
-    .unlock-message {
-      text-align: left;
+    .unlock-header {
+      display: flex;
+      align-items: center;
       font-size: 16px;
       padding: 0 2px;
+    }
+
+    .unlock-favicon {
+      margin-right: 6px;
     }
 
     .unlock-error {
@@ -67,7 +72,10 @@
 </head>
 <body>
   <div class="unlock-container" style="display: none;">
-    <div class="unlock-message">&nbsp;</div>
+    <div class="unlock-header">
+      <img class="unlock-favicon" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" width="16" height="16" />
+      <div class="unlock-hostname">&nbsp;</div>
+    </div>
     <div style="height: 12px; width: 1px; flex-grow: 1;"></div>
     <form class="unlock-form"><input class="unlock-input" type="password" placeholder="Master Password to sign in" autofocus /></form>
     <div style="height: 12px; width: 1px; flex-grow: 1;"></div>
