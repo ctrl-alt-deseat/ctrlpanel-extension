@@ -138,7 +138,7 @@ async function onPopupOpen () {
   }
 
   if (await CtrlpanelExtension.needMasterPassword()) {
-    return render({ kind: 'locked', hostname: hostname })
+    return render({ kind: 'locked', hostname })
   }
 
   return displayAccount()
@@ -186,7 +186,7 @@ async function displayAccount () {
   await CtrlpanelExtension.sync()
 
   const tab = (await wextTabs.query({ active: true, currentWindow: true }))[0]
-  const { hostname } = (new URL(unwrap(tab.url)))
+  const hostname = stripCommonPrefixes(new URL(unwrap(tab.url)).hostname)
   const account = await CtrlpanelExtension.getAccountForHostname(hostname)
 
   if (!account) {
