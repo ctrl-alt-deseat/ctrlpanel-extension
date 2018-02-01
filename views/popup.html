@@ -5,11 +5,11 @@
     body, html {
       margin: 0;
       padding: 0;
+      width: 256px;
       font-family: -apple-system,BlinkMacSystemFont,sans-serif;
     }
 
     body {
-      min-width: 224px;
       min-height: 90px;
       display: flex;
     }
@@ -19,6 +19,7 @@
     .error-container,
     .account-container {
       padding: 12px;
+      max-width: calc(100% - 24px);
       display: flex;
       flex-direction: column;
       flex-grow: 1;
@@ -37,9 +38,10 @@
     .unlock-header,
     .account-header {
       display: flex;
+      padding: 0 2px;
+      max-width: calc(100% - 4px);
       align-items: center;
       font-size: 16px;
-      padding: 0 2px;
     }
 
     .unlock-favicon,
@@ -50,6 +52,10 @@
     .unlock-hostname,
     .account-hostname {
       flex-grow: 1;
+      flex-shrink: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .unlock-error {
@@ -83,24 +89,28 @@
 
     .account-login {
       padding: 2px 4px;
+      margin-left: 6px;
       border-radius: 2px;
       background-color: #4682b4;
       color: white;
       font-size: 12px;
       font-weight: 100;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     .account-handle,
     .account-password {
       font-size: 12px;
       text-align: center;
+      margin-top: 6px;
+      padding: 2px 4px;
+      max-width: calc(100% - 8px);
       border-radius: 2px;
       background-color: #ebebeb;
-      padding: 2px 4px;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-top: 6px;
+      white-space: nowrap;
     }
 
     .account-password {

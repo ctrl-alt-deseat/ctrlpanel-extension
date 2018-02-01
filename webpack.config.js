@@ -35,7 +35,7 @@ const manifest = WextManifest[targetBrowser]({
 
   applications: {
     gecko: { id: `{${EXT_ID}}` },
-    safari: { id: BUNDLE_ID, developer_id: DEVELOPER_ID, popup_width: 224, popup_height: 83 }
+    safari: { id: BUNDLE_ID, developer_id: DEVELOPER_ID, popup_width: 256, popup_height: 83 }
   },
 
   author: 'Ctrl Alt Deseat AB',
