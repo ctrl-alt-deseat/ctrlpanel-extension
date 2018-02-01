@@ -10,6 +10,7 @@ import stripCommonPrefixes from './lib/strip-common-prefixes'
 
 const EMPTY_IMAGE_SRC = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
 const NO_BREAK_SPACE = String.fromCodePoint(0x00A0)
+const BULLET = String.fromCodePoint(0x2022)
 
 const hasSafariGlobal = (typeof safari === 'object')
 
@@ -26,12 +27,19 @@ const errorContainer = unwrap(document.querySelector<HTMLDivElement>('div.error-
 const errorMessage = unwrap(document.querySelector<HTMLDivElement>('div.error-message'))
 const errorAppLink = unwrap(document.querySelector<HTMLAnchorElement>('div.error-app-link a'))
 
+const accountContainer = unwrap(document.querySelector<HTMLDivElement>('div.account-container'))
+const accountFavicon = unwrap(document.querySelector<HTMLImageElement>('img.account-favicon'))
+const accountLogin = unwrap(document.querySelector<HTMLDivElement>('div.account-login'))
+const accountHostname = unwrap(document.querySelector<HTMLDivElement>('div.account-hostname'))
+const accountHandle = unwrap(document.querySelector<HTMLDivElement>('div.account-handle'))
+const accountPassword = unwrap(document.querySelector<HTMLDivElement>('div.account-password'))
+
 interface EmptyState {
   kind: 'empty'
 }
 
 interface LockedState {
-  kind: 'locked',
+  kind: 'locked'
   hostname: string
   errorMessage?: string
 }
@@ -45,7 +53,13 @@ interface ErrorState {
   message: string
 }
 
-type State = EmptyState | LockedState | LoadingState | ErrorState
+interface AccountState {
+  kind: 'account'
+  hostname: string
+  account: CtrlpanelExtension.AccountResult
+}
+
+type State = EmptyState | LockedState | LoadingState | ErrorState | AccountState
 
 setTimeout(() => unlockInput.focus(), 200)
 
@@ -66,12 +80,18 @@ function render (newState?: State) {
   unlockContainer.style.display = (state.kind === 'locked' ? '' : 'none')
   loadingContainer.style.display = (state.kind === 'loading' ? '' : 'none')
   errorContainer.style.display = (state.kind === 'error' ? '' : 'none')
+  accountContainer.style.display = (state.kind === 'account' ? '' : 'none')
 
   unlockHostname.textContent = (state.kind === 'locked' ? (state.hostname.charAt(0).toUpperCase() + state.hostname.slice(1)) : NO_BREAK_SPACE)
   unlockFavicon.src = (state.kind === 'locked' ? `https://api.ind3x.io/v1/domains/${state.hostname}/icon` : EMPTY_IMAGE_SRC)
   unlockError.textContent = (state.kind === 'locked' ? (state.errorMessage || '') : '')
 
   errorMessage.textContent = (state.kind === 'error' ? state.message : '')
+
+  accountHostname.textContent = (state.kind === 'account' ? (state.hostname.charAt(0).toUpperCase() + state.hostname.slice(1)) : NO_BREAK_SPACE)
+  accountFavicon.src = (state.kind === 'account' ? `https://api.ind3x.io/v1/domains/${state.hostname}/icon` : EMPTY_IMAGE_SRC)
+  accountHandle.textContent = (state.kind === 'account' ? state.account.handle : NO_BREAK_SPACE)
+  accountPassword.textContent = (state.kind === 'account' ? state.account.password.replace(/./g, BULLET) : NO_BREAK_SPACE)
 
   refreshPopupHeight()
 }
@@ -121,12 +141,16 @@ async function onPopupOpen () {
     return render({ kind: 'locked', hostname: hostname })
   }
 
-  return fillAccount()
+  return displayAccount()
 }
 
 errorAppLink.addEventListener('click', async () => {
   await wextTabs.create({ active: true, url: `${APP_HOST}/` })
   hidePopup()
+})
+
+accountLogin.addEventListener('click', async () => {
+  if (state.kind === 'account') await fillAccount(state.account)
 })
 
 unlockForm.addEventListener('submit', async (ev) => {
@@ -155,10 +179,10 @@ unlockForm.addEventListener('submit', async (ev) => {
   // The password was correct, cache it and remove it from the DOM now
   unlockInput.value = ''
 
-  return fillAccount()
+  return displayAccount()
 })
 
-async function fillAccount () {
+async function displayAccount () {
   await CtrlpanelExtension.sync()
 
   const tab = (await wextTabs.query({ active: true, currentWindow: true }))[0]
@@ -169,6 +193,10 @@ async function fillAccount () {
     return render({ kind: 'error', message: 'No account found' })
   }
 
+  render({ kind: 'account', hostname, account })
+}
+
+async function fillAccount (account: CtrlpanelExtension.AccountResult) {
   try {
     await wextTabs.executeScript({ code: `window.__ctrlpanel_extension_perform_login__(${JSON.stringify(account.handle)}, ${JSON.stringify(account.password)}, ${JSON.stringify(AUTO_SUBMIT)})` })
   } catch (_) {

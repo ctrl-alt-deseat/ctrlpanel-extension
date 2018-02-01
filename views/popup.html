@@ -16,7 +16,8 @@
 
     .unlock-container,
     .loading-container,
-    .error-container {
+    .error-container,
+    .account-container {
       padding: 12px;
       display: flex;
       flex-direction: column;
@@ -33,15 +34,22 @@
       flex-direction: column;
     }
 
-    .unlock-header {
+    .unlock-header,
+    .account-header {
       display: flex;
       align-items: center;
       font-size: 16px;
       padding: 0 2px;
     }
 
-    .unlock-favicon {
+    .unlock-favicon,
+    .account-favicon {
       margin-right: 6px;
+    }
+
+    .unlock-hostname,
+    .account-hostname {
+      flex-grow: 1;
     }
 
     .unlock-error {
@@ -68,6 +76,36 @@
     .error-app-link a:hover {
       text-decoration: underline;
     }
+
+    .account-header {
+      margin-bottom: 4px;
+    }
+
+    .account-login {
+      padding: 2px 4px;
+      border-radius: 2px;
+      background-color: #4682b4;
+      color: white;
+      font-size: 12px;
+      font-weight: 100;
+      cursor: pointer;
+    }
+
+    .account-handle,
+    .account-password {
+      font-size: 12px;
+      text-align: center;
+      border-radius: 2px;
+      background-color: #ebebeb;
+      padding: 2px 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 6px;
+    }
+
+    .account-password {
+      color: #666;
+    }
   </style>
 </head>
 <body>
@@ -77,7 +115,7 @@
       <div class="unlock-hostname">&nbsp;</div>
     </div>
     <div style="height: 12px; width: 1px; flex-grow: 1;"></div>
-    <form class="unlock-form"><input class="unlock-input" type="password" placeholder="Master Password to sign in" autofocus /></form>
+    <form class="unlock-form"><input class="unlock-input" type="password" placeholder="Master Password" autofocus /></form>
     <div style="height: 12px; width: 1px; flex-grow: 1;"></div>
     <div class="unlock-error"></div>
   </div>
@@ -90,6 +128,16 @@
     <div class="error-message"></div>
     <div style="height: 12px; width: 1px; flex-grow: 1;"></div>
     <div class="error-app-link"><a>Go to app</a></div>
+  </div>
+
+  <div class="account-container">
+    <div class="account-header">
+      <img class="account-favicon" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" width="16" height="16" />
+      <div class="account-hostname">&nbsp;</div>
+      <div class="account-login">Sign in</div>
+    </div>
+    <div class="account-handle">&nbsp;</div>
+    <div class="account-password">&nbsp;</div>
   </div>
 
   <script src="popup.js"></script>

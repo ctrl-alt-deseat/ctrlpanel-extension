@@ -28,7 +28,7 @@ export function sync() {
   return remoteCall<void>('sync')
 }
 
-interface AccountResult { handle: string, password: string }
+export interface AccountResult { handle: string, password: string }
 export function getAccountForHostname (hostname: string) {
   return remoteCall<AccountResult>('getAccountForHostname', hostname)
 }
