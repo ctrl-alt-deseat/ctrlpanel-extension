@@ -32,7 +32,7 @@ async function needCredentials () {
   if (state.kind === 'unlocked') return false
   if (state.kind === 'connected') return false
 
-  const tab = unwrap(await wextTabs.create({ active: false, url: `${APP_HOST}/#login` }))
+  const tab = unwrap(await wextTabs.create({ active: false, url: `${APP_HOST}/` }))
   const tabId = unwrap(tab.id)
 
   await waitForComplete(tabId)
