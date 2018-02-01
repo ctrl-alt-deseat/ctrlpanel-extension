@@ -2,12 +2,14 @@
 
 import unwrap = require('ts-unwrap')
 
-import CtrlpanelCore, { State } from '@ctrlpanel/core'
 import * as wextTabs from '@wext/tabs'
 
 import { API_HOST, APP_HOST, AUTO_SUBMIT } from './config'
+import * as CtrlpanelExtension from './extension'
+import stripCommonPrefixes from './lib/strip-common-prefixes'
 
 const EMPTY_IMAGE_SRC = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
+const NO_BREAK_SPACE = String.fromCodePoint(0x00A0)
 
 const hasSafariGlobal = (typeof safari === 'object')
 
@@ -18,31 +20,36 @@ const unlockHostname = unwrap(document.querySelector<HTMLDivElement>('div.unlock
 const unlockInput = unwrap(document.querySelector<HTMLInputElement>('input.unlock-input'))
 const unlockError = unwrap(document.querySelector<HTMLDivElement>('div.unlock-error'))
 
-const statusContainer = unwrap(document.querySelector<HTMLDivElement>('div.status-container'))
+const loadingContainer = unwrap(document.querySelector<HTMLDivElement>('div.loading-container'))
 
 const errorContainer = unwrap(document.querySelector<HTMLDivElement>('div.error-container'))
 const errorMessage = unwrap(document.querySelector<HTMLDivElement>('div.error-message'))
 const errorAppLink = unwrap(document.querySelector<HTMLAnchorElement>('div.error-app-link a'))
 
-const reCommonPrefixes = /^(account|accounts|app|dashboard|login|signin|www)\./
+interface EmptyState {
+  kind: 'empty'
+}
+
+interface LockedState {
+  kind: 'locked',
+  hostname: string
+  errorMessage?: string
+}
+
+interface LoadingState {
+  kind: 'loading'
+}
+
+interface ErrorState {
+  kind: 'error'
+  message: string
+}
+
+type State = EmptyState | LockedState | LoadingState | ErrorState
 
 setTimeout(() => unlockInput.focus(), 200)
 
-const core = new CtrlpanelCore(API_HOST)
 const originalHeight = document.body.clientHeight
-
-let state: State = core.init()
-
-function waitForComplete (targetTabId: number) {
-  return new Promise((resolve, reject) => {
-    wextTabs.onUpdated.addListener(function listener (tabId, changeInfo) {
-      if (tabId === targetTabId && changeInfo.status === 'complete') {
-        wextTabs.onUpdated.removeListener(listener)
-        resolve()
-      }
-    })
-  })
-}
 
 function refreshPopupHeight () {
   if (hasSafariGlobal) safari.self.height = document.body.clientHeight
@@ -52,31 +59,36 @@ function hidePopup () {
   return (hasSafariGlobal ? safari.self.hide() : window.close())
 }
 
+let state: State = { kind: 'empty' }
+function render (newState?: State) {
+  if (newState) state = newState
+
+  unlockContainer.style.display = (state.kind === 'locked' ? '' : 'none')
+  loadingContainer.style.display = (state.kind === 'loading' ? '' : 'none')
+  errorContainer.style.display = (state.kind === 'error' ? '' : 'none')
+
+  unlockHostname.innerHTML = (state.kind === 'locked' ? (state.hostname.charAt(0).toUpperCase() + state.hostname.slice(1)) : NO_BREAK_SPACE)
+  unlockFavicon.src = (state.kind === 'locked' ? `https://api.ind3x.io/v1/domains/${state.hostname}/icon` : EMPTY_IMAGE_SRC)
+  unlockError.textContent = (state.kind === 'locked' ? (state.errorMessage || '') : '')
+
+  errorMessage.textContent = (state.kind === 'error' ? state.message : '')
+
+  refreshPopupHeight()
+}
+
 // Safari doesn't reset the popup when it closes
 if (hasSafariGlobal) {
   window.addEventListener('blur', () => {
     setTimeout(() => {
       safari.self.height = originalHeight
       unlockInput.value = ''
-      unlockContainer.style.display = 'none'
-      statusContainer.style.display = 'none'
-      errorContainer.style.display = 'none'
+      render({ kind: 'empty' })
     }, 280)
   })
 
-  window.addEventListener('focus', async () => {
-    onPopupOpen()
-  })
+  window.addEventListener('focus', onPopupOpen)
 } else {
   onPopupOpen()
-}
-
-function displayError (message: string) {
-  unlockContainer.style.display = 'none'
-  statusContainer.style.display = 'none'
-  errorContainer.style.display = ''
-  errorMessage.textContent = message
-  refreshPopupHeight()
 }
 
 async function onPopupOpen () {
@@ -84,29 +96,34 @@ async function onPopupOpen () {
   unlockHostname.innerHTML = '&nbsp;'
   refreshPopupHeight()
 
+  if (await CtrlpanelExtension.needCredentials()) {
+    return render({ kind: 'error', message: 'Please log in to Ctrlpanel' })
+  }
+
   const tab = (await wextTabs.query({ active: true, currentWindow: true }))[0]
 
   if (!tab.url) {
-    return displayError('Not on sign in page')
+    return render({ kind: 'error', message: 'Not on sign in page' })
   }
 
   if (tab.url.startsWith('about:')) {
-    return displayError('Not on sign in page')
+    return render({ kind: 'error', message: 'Not on sign in page' })
   }
 
-  const hostname = (new URL(tab.url)).hostname.replace(reCommonPrefixes, '')
-
-  unlockContainer.style.display = ''
-  unlockFavicon.src = `https://api.ind3x.io/v1/domains/${hostname}/icon`
-  unlockHostname.textContent = hostname.charAt(0).toUpperCase() + hostname.slice(1)
-  refreshPopupHeight()
+  const hostname = stripCommonPrefixes((new URL(tab.url)).hostname)
 
   await wextTabs.executeScript({ file: '/filler.js' })
   const hasLogin = (await wextTabs.executeScript({ code: `window.__ctrlpanel_extension_has_login__()` }))[0]
 
   if (!hasLogin) {
-    return displayError('Not on sign in page')
+    return render({ kind: 'error', message: 'Not on sign in page' })
   }
+
+  if (await CtrlpanelExtension.needMasterPassword()) {
+    return render({ kind: 'locked', hostname: hostname })
+  }
+
+  return fillAccount()
 }
 
 errorAppLink.addEventListener('click', async () => {
@@ -117,73 +134,48 @@ errorAppLink.addEventListener('click', async () => {
 unlockForm.addEventListener('submit', async (ev) => {
   ev.preventDefault()
 
+  if (state.kind !== 'locked') {
+    throw new Error(`Unexpected state: ${state.kind}`)
+  }
+
+  const { hostname } = state
+
+  render({ kind: 'loading' })
+
   const masterPassword = unlockInput.value
 
-  unlockContainer.style.display = 'none'
-  statusContainer.style.display = ''
-  unlockError.textContent = ''
-
-  refreshPopupHeight()
-
-  if (state.kind === 'empty') {
-    const tab = unwrap(await wextTabs.create({ active: false, url: `${APP_HOST}/#login` }))
-    const tabId = unwrap(tab.id)
-
-    await waitForComplete(tabId)
-
-    const syncToken = unwrap(await wextTabs.executeScript(tabId, { code: 'window.localStorage.getItem("credentials")' }))[0] as string | undefined
-
-    if (!syncToken) {
-      await wextTabs.update(tabId, { active: true })
-      return displayError('Please log in to Ctrlpanel')
+  try {
+    await CtrlpanelExtension.unlock(masterPassword)
+  } catch (err) {
+    if (err.code === 'WRONG_MASTER_PASSWORD') {
+      return render({ kind: 'locked', hostname, errorMessage: 'Wrong master password' })
     }
 
-    await wextTabs.remove(tabId)
-
-    state = core.init(syncToken)
+    throw err
   }
 
-  if (state.kind === 'locked') {
-    try {
-      state = await core.unlock(state, masterPassword)
-    } catch (err) {
-      if (err.code === 'WRONG_MASTER_PASSWORD') {
-        unlockContainer.style.display = ''
-        statusContainer.style.display = 'none'
-        unlockError.textContent = 'Wrong master password'
-        refreshPopupHeight()
-        return
-      }
-
-      throw err
-    }
-  }
-
-  // The password was correct, remove it from the DOM now
+  // The password was correct, cache it and remove it from the DOM now
   unlockInput.value = ''
 
-  if (state.kind === 'unlocked') {
-    state = await core.connect(state)
-  }
+  return fillAccount()
+})
 
-  state = await core.sync(state)
+async function fillAccount () {
+  await CtrlpanelExtension.sync()
 
   const tab = (await wextTabs.query({ active: true, currentWindow: true }))[0]
-  const hostname = (new URL(unwrap(tab.url))).hostname.replace(reCommonPrefixes, '')
-
-  const data = core.getParsedEntries(state)
-  const accounts = Object.keys(data.accounts).map(key => data.accounts[key])
-  const account = accounts.find(acc => acc.hostname.replace(reCommonPrefixes, '') === hostname)
+  const { hostname } = (new URL(unwrap(tab.url)))
+  const account = await CtrlpanelExtension.getAccountForHostname(hostname)
 
   if (!account) {
-    return displayError('No account found')
+    return render({ kind: 'error', message: 'No account found' })
   }
 
   try {
     await wextTabs.executeScript({ code: `window.__ctrlpanel_extension_perform_login__(${JSON.stringify(account.handle)}, ${JSON.stringify(account.password)}, ${JSON.stringify(AUTO_SUBMIT)})` })
   } catch (_) {
-    return displayError('Failed to fill')
+    return render({ kind: 'error', message: 'Failed to fill' })
   }
 
   hidePopup()
-})
+}

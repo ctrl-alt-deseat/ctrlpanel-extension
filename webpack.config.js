@@ -50,6 +50,10 @@ const manifest = WextManifest[targetBrowser]({
     `${APP_HOST.replace(/:\d+$/, '')}/*`
   ]),
 
+  background: {
+    page: 'global.html'
+  },
+
   browser_action: {
     default_title: 'Ctrlpanel',
     default_popup: 'popup.html',
@@ -66,6 +70,7 @@ const manifest = WextManifest[targetBrowser]({
 module.exports = {
   entry: {
     filler: './source/filler.ts',
+    global: './source/global.ts',
     popup: './source/popup.ts'
   },
   output: {
@@ -97,6 +102,7 @@ module.exports = {
     new CopyWebpackPlugin([
       ...shims,
       { from: 'spinner.svg', context: 'assets' },
+      { from: 'global.html', context: 'views' },
       { from: 'popup.html', context: 'views' }
     ])
   ]
