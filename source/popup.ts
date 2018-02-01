@@ -128,6 +128,10 @@ async function onPopupOpen () {
     return render({ kind: 'error', message: 'Not on sign in page' })
   }
 
+  if (tab.url.startsWith('chrome:')) {
+    return render({ kind: 'error', message: 'Not on sign in page' })
+  }
+
   const hostname = stripCommonPrefixes((new URL(tab.url)).hostname)
 
   await wextTabs.executeScript({ file: '/filler.js' })
