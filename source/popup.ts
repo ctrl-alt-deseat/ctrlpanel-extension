@@ -67,7 +67,7 @@ function render (newState?: State) {
   loadingContainer.style.display = (state.kind === 'loading' ? '' : 'none')
   errorContainer.style.display = (state.kind === 'error' ? '' : 'none')
 
-  unlockHostname.innerHTML = (state.kind === 'locked' ? (state.hostname.charAt(0).toUpperCase() + state.hostname.slice(1)) : NO_BREAK_SPACE)
+  unlockHostname.textContent = (state.kind === 'locked' ? (state.hostname.charAt(0).toUpperCase() + state.hostname.slice(1)) : NO_BREAK_SPACE)
   unlockFavicon.src = (state.kind === 'locked' ? `https://api.ind3x.io/v1/domains/${state.hostname}/icon` : EMPTY_IMAGE_SRC)
   unlockError.textContent = (state.kind === 'locked' ? (state.errorMessage || '') : '')
 
@@ -92,9 +92,7 @@ if (hasSafariGlobal) {
 }
 
 async function onPopupOpen () {
-  unlockFavicon.src = EMPTY_IMAGE_SRC
-  unlockHostname.innerHTML = '&nbsp;'
-  refreshPopupHeight()
+  render({ kind: 'empty' })
 
   if (await CtrlpanelExtension.needCredentials()) {
     return render({ kind: 'error', message: 'Please log in to Ctrlpanel' })
