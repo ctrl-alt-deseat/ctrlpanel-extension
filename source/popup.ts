@@ -61,8 +61,6 @@ interface AccountState {
 
 type State = EmptyState | LockedState | LoadingState | ErrorState | AccountState
 
-setTimeout(() => unlockInput.focus(), 200)
-
 const originalHeight = document.body.clientHeight
 
 function refreshPopupHeight () {
@@ -92,6 +90,10 @@ function render (newState?: State) {
   accountFavicon.src = (state.kind === 'account' ? `https://api.ind3x.io/v1/domains/${state.hostname}/icon` : EMPTY_IMAGE_SRC)
   accountHandle.textContent = (state.kind === 'account' ? state.account.handle : NO_BREAK_SPACE)
   accountPassword.textContent = (state.kind === 'account' ? state.account.password.replace(/./g, BULLET) : NO_BREAK_SPACE)
+
+  if (newState && newState.kind === 'locked') {
+    unlockInput.focus()
+  }
 
   refreshPopupHeight()
 }
