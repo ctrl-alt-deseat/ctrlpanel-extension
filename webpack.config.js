@@ -25,8 +25,6 @@ const iconSource = fs.readFileSync(`assets/logo${isProduction ? '' : '-dev'}.svg
 const actionIcon = WextIcons.action(iconSource, targetBrowser)
 const extensionIcon = WextIcons.extension(iconSource, targetBrowser, { shape: 'circle' })
 
-const shims = (targetBrowser === 'safari' ? [{ from: require.resolve('@wext/tabs/safari-shim'), to: 'safari-shim.js' }] : [])
-
 const manifest = WextManifest[targetBrowser]({
   manifest_version: 2,
   name: (isProduction ? 'Ctrlpanel' : 'Ctrlpanel DEV'),
@@ -60,15 +58,16 @@ const manifest = WextManifest[targetBrowser]({
     default_icon: actionIcon.spec
   },
 
-  content_scripts: (targetBrowser !== 'safari' ? undefined : [{
-    matches: ['*://*/*'],
+  content_scripts: [{
+    matches: [(targetBrowser === 'safari' ? '*://*/*' : `${APP_HOST.replace(/:\d+$/, '')}/*`)],
     run_at: 'document_start',
-    js: ['safari-shim.js']
-  }])
+    js: ['content.js']
+  }]
 })
 
 module.exports = {
   entry: {
+    content: './source/content.ts',
     filler: './source/filler.ts',
     global: './source/global.ts',
     popup: './source/popup.ts'
@@ -92,7 +91,8 @@ module.exports = {
       'process.env.API_HOST': JSON.stringify(API_HOST),
       'process.env.APP_HOST': JSON.stringify(APP_HOST),
       'process.env.AUTO_SUBMIT': JSON.stringify(AUTO_SUBMIT),
-      'process.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'development')
+      'process.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'development'),
+      'process.env.TARGET_BROWSER': JSON.stringify(targetBrowser)
     }),
     new WriteWebpackPlugin([
       ...extensionIcon.files,
@@ -100,7 +100,6 @@ module.exports = {
       { name: manifest.name, data: Buffer.from(manifest.content) }
     ]),
     new CopyWebpackPlugin([
-      ...shims,
       { from: 'spinner.svg', context: 'assets' },
       { from: 'global.html', context: 'views' },
       { from: 'popup.html', context: 'views' }

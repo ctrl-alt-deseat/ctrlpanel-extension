@@ -13,17 +13,20 @@ let state: State = core.init()
 
 const LockTimeout = {
   id: null as any,
-  extend () {
+  clear () {
     if (this.id) clearTimeout(this.id)
+  },
+  lock () {
+    this.id = null
 
-    this.id = setTimeout(() => {
-      this.id = null
+    if (state.kind === 'empty') return
+    if (state.kind === 'locked') return
 
-      if (state.kind === 'empty') return
-      if (state.kind === 'locked') return
-
-      state = core.lock(state)
-    }, 5 * 60 * 1000)
+    state = core.lock(state)
+  },
+  extend () {
+    this.clear()
+    this.id = setTimeout(() => this.lock(), 5 * 60 * 1000)
   }
 }
 
@@ -98,6 +101,29 @@ async function getAccountForHostname (hostname: string) {
   return accounts.find(acc => stripCommonPrefixes(acc.hostname) === search)
 }
 
+async function seed (handle: string, secretKey: string, masterPassword: string) {
+  if (state.kind !== 'empty' && state.handle !== handle) {
+    LockTimeout.clear()
+    state = await core.clearStoredData(state)
+  }
+
+  if (state.kind === 'empty') {
+    state = await core.login(state, handle, secretKey, masterPassword, true)
+  }
+
+  if (state.kind === 'locked') {
+    state = await core.unlock(state, masterPassword)
+  }
+
+  if (state.kind === 'unlocked') {
+    LockTimeout.extend()
+    state = await core.connect(state)
+  }
+
+  LockTimeout.extend()
+  state = await core.sync(state)
+}
+
 wextRuntime.onMessage.addListener((message, sender, sendResponse) => {
   Promise.resolve()
     .then<any, any>(() => {
@@ -107,6 +133,7 @@ wextRuntime.onMessage.addListener((message, sender, sendResponse) => {
         case 'unlock': return unlock(message.args[0])
         case 'sync': return sync()
         case 'getAccountForHostname': return getAccountForHostname(message.args[0])
+        case 'seed': return seed(message.args[0], message.args[1], message.args[2])
         default: throw new Error(`Unknown method: ${message.method}`)
       }
     })

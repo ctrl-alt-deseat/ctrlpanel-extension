@@ -32,3 +32,7 @@ export interface AccountResult { handle: string, password: string }
 export function getAccountForHostname (hostname: string) {
   return remoteCall<AccountResult>('getAccountForHostname', hostname)
 }
+
+export function seed (handle: string, secretKey: string, masterPassword: string) {
+  return remoteCall<void>('seed', handle, secretKey, masterPassword)
+}
