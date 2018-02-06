@@ -12,8 +12,6 @@ const EMPTY_IMAGE_SRC = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAA
 const NO_BREAK_SPACE = String.fromCodePoint(0x00A0)
 const BULLET = String.fromCodePoint(0x2022)
 
-const hasSafariGlobal = (typeof safari === 'object')
-
 const unlockContainer = unwrap(document.querySelector<HTMLDivElement>('div.unlock-container'))
 const unlockForm = unwrap(document.querySelector<HTMLFormElement>('form.unlock-form'))
 const unlockFavicon = unwrap(document.querySelector<HTMLImageElement>('img.unlock-favicon'))
@@ -64,11 +62,11 @@ type State = EmptyState | LockedState | LoadingState | ErrorState | AccountState
 const originalHeight = document.body.clientHeight
 
 function refreshPopupHeight () {
-  if (hasSafariGlobal) safari.self.height = document.body.clientHeight
+  if (typeof safari === 'object') safari.self.height = document.body.clientHeight
 }
 
 function hidePopup () {
-  return (hasSafariGlobal ? safari.self.hide() : window.close())
+  return (typeof safari === 'object' ? safari.self.hide() : window.close())
 }
 
 let state: State = { kind: 'empty' }
@@ -99,7 +97,7 @@ function render (newState?: State) {
 }
 
 // Safari doesn't reset the popup when it closes
-if (hasSafariGlobal) {
+if (typeof safari === 'object') {
   window.addEventListener('blur', () => {
     setTimeout(() => {
       safari.self.height = originalHeight
