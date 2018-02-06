@@ -4,8 +4,8 @@ import unwrap = require('ts-unwrap')
 
 import * as wextTabs from '@wext/tabs'
 
-import { API_HOST, APP_HOST, AUTO_SUBMIT } from './config'
-import * as CtrlpanelExtension from './extension'
+import { API_HOST, APP_HOST, AUTO_SUBMIT } from './lib/config'
+import * as CtrlpanelExtension from './lib/extension'
 import stripCommonPrefixes from './lib/strip-common-prefixes'
 
 const EMPTY_IMAGE_SRC = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='

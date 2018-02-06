@@ -1,4 +1,4 @@
-import { API_HOST, APP_HOST } from './config'
+import { API_HOST, APP_HOST } from './lib/config'
 import stripCommonPrefixes from './lib/strip-common-prefixes'
 import waitForComplete from './lib/wait-for-complete'
 
