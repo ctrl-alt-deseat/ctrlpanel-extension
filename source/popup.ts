@@ -4,7 +4,7 @@ import unwrap = require('ts-unwrap')
 
 import * as wextTabs from '@wext/tabs'
 
-import { API_HOST, APP_HOST, AUTO_SUBMIT } from './lib/config'
+import { APP_HOST, AUTO_SUBMIT } from './lib/config'
 import * as CtrlpanelExtension from './lib/extension'
 import stripCommonPrefixes from './lib/strip-common-prefixes'
 

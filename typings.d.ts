@@ -10,9 +10,11 @@ declare module '@buttercup/locust' {
   }
 }
 
-declare const safari: {
+interface Safari {
   self: {
     height: number
     hide: () => void
   }
 }
+
+declare const safari: Safari | undefined

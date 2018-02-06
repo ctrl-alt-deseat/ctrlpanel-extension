@@ -20,11 +20,11 @@ export function needMasterPassword () {
   return remoteCall<boolean>('needMasterPassword')
 }
 
-export function unlock(masterPassword: string) {
+export function unlock (masterPassword: string) {
   return remoteCall<void>('unlock', masterPassword)
 }
 
-export function sync() {
+export function sync () {
   return remoteCall<void>('sync')
 }
 

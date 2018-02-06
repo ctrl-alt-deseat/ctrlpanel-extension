@@ -139,7 +139,7 @@ wextRuntime.onMessage.addListener((message, sender, sendResponse) => {
     })
     .then(
       (result) => sendResponse({ result }),
-      (err) => sendResponse({ error: { message: `${err.name}: ${err.message}`, code: err.code }})
+      (err) => sendResponse({ error: { message: `${err.name}: ${err.message}`, code: err.code } })
     )
 
   return true

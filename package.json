@@ -4,6 +4,7 @@
   "license": "UNLICENSED",
   "repository": "ctrl-alt-deseat/ctrlpanel-extension",
   "scripts": {
+    "test": "tslint --project tsconfig.json",
     "build:prod:firefox": "NODE_ENV=production TARGET_BROWSER=firefox webpack",
     "build:prod:chrome": "NODE_ENV=production TARGET_BROWSER=chrome webpack",
     "build:prod:opera": "NODE_ENV=production TARGET_BROWSER=opera webpack",
@@ -37,6 +38,8 @@
     "copy-webpack-plugin": "^4.3.1",
     "npm-run-all": "^4.1.2",
     "ts-loader": "^3.4.0",
+    "tslint": "^5.9.1",
+    "tslint-config-standard": "^7.0.0",
     "typescript": "^2.7.1",
     "utc-version": "^1.1.0",
     "web-ext": "^2.3.1",
