@@ -53,7 +53,7 @@ const manifest = WextManifest[targetBrowser]({
   },
 
   browser_action: {
-    default_title: 'Ctrlpanel',
+    default_title: (isProduction ? 'Ctrlpanel' : 'Ctrlpanel DEV'),
     default_popup: 'popup.html',
     default_icon: actionIcon.spec
   },
