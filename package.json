@@ -30,6 +30,7 @@
     "@ctrlpanel/core": "^0.2.1",
     "@wext/runtime": "^0.1.2",
     "@wext/tabs": "^0.1.3",
+    "inactivity-timer": "^1.0.0",
     "ts-unwrap": "^1.0.0"
   },
   "devDependencies": {

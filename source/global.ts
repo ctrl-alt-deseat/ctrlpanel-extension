@@ -4,6 +4,7 @@ import waitForComplete from './lib/wait-for-complete'
 
 import CtrlpanelCore, { State } from '@ctrlpanel/core'
 
+import createInactivityTimer = require('inactivity-timer')
 import wextRuntime = require('@wext/runtime')
 import wextTabs = require('@wext/tabs')
 import unwrap = require('ts-unwrap')
@@ -11,24 +12,12 @@ import unwrap = require('ts-unwrap')
 const core = new CtrlpanelCore(API_HOST)
 let state: State = core.init()
 
-const LockTimeout = {
-  id: null as any,
-  clear () {
-    if (this.id) clearTimeout(this.id)
-  },
-  lock () {
-    this.id = null
+const lockTimer = createInactivityTimer('5m', () => {
+  if (state.kind === 'empty') return
+  if (state.kind === 'locked') return
 
-    if (state.kind === 'empty') return
-    if (state.kind === 'locked') return
-
-    state = core.lock(state)
-  },
-  extend () {
-    this.clear()
-    this.id = setTimeout(() => this.lock(), 5 * 60 * 1000)
-  }
-}
+  state = core.lock(state)
+})
 
 async function needCredentials () {
   if (state.kind === 'locked') return false
@@ -62,7 +51,7 @@ async function needMasterPassword () {
     throw new Error(`Unexpected state: ${state.kind}`)
   }
 
-  LockTimeout.extend()
+  lockTimer.signal()
   return true
 }
 
@@ -71,13 +60,13 @@ async function unlock (masterPassword: string) {
     throw new Error(`Unexpected state: ${state.kind}`)
   }
 
-  LockTimeout.extend()
+  lockTimer.signal()
   state = await core.unlock(state, masterPassword)
 }
 
 async function sync () {
   if (state.kind === 'unlocked') {
-    LockTimeout.extend()
+    lockTimer.signal()
     state = await core.connect(state)
   }
 
@@ -85,7 +74,7 @@ async function sync () {
     throw new Error(`Unexpected state: ${state.kind}`)
   }
 
-  LockTimeout.extend()
+  lockTimer.signal()
   state = await core.sync(state)
 }
 
@@ -103,7 +92,7 @@ async function getAccountForHostname (hostname: string) {
 
 async function seed (handle: string, secretKey: string, masterPassword: string) {
   if (state.kind !== 'empty' && state.handle !== handle) {
-    LockTimeout.clear()
+    lockTimer.clear()
     state = await core.clearStoredData(state)
   }
 
@@ -116,11 +105,11 @@ async function seed (handle: string, secretKey: string, masterPassword: string) 
   }
 
   if (state.kind === 'unlocked') {
-    LockTimeout.extend()
+    lockTimer.signal()
     state = await core.connect(state)
   }
 
-  LockTimeout.extend()
+  lockTimer.signal()
   state = await core.sync(state)
 }
 
