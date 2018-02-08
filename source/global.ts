@@ -113,6 +113,20 @@ async function seed (handle: string, secretKey: string, masterPassword: string) 
   state = await core.sync(state)
 }
 
+async function signalActivity () {
+  if (state.kind === 'empty') return
+  if (state.kind === 'locked') return
+
+  lockTimer.signal()
+}
+
+async function lock () {
+  if (state.kind === 'empty') return
+  if (state.kind === 'locked') return
+
+  state = core.lock(state)
+}
+
 wextRuntime.onMessage.addListener((message, sender, sendResponse) => {
   Promise.resolve()
     .then<any, any>(() => {
@@ -123,6 +137,8 @@ wextRuntime.onMessage.addListener((message, sender, sendResponse) => {
         case 'sync': return sync()
         case 'getAccountForHostname': return getAccountForHostname(message.args[0])
         case 'seed': return seed(message.args[0], message.args[1], message.args[2])
+        case 'signalActivity': return signalActivity()
+        case 'lock': return lock()
         default: throw new Error(`Unknown method: ${message.method}`)
       }
     })

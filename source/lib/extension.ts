@@ -36,3 +36,11 @@ export function getAccountForHostname (hostname: string) {
 export function seed (handle: string, secretKey: string, masterPassword: string) {
   return remoteCall<void>('seed', handle, secretKey, masterPassword)
 }
+
+export function signalActivity () {
+  return remoteCall<void>('signalActivity')
+}
+
+export function lock () {
+  return remoteCall<void>('lock')
+}
