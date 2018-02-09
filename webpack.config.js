@@ -21,6 +21,9 @@ const EXT_ID = (isProduction ? '4b209421-a51b-4556-88f1-a712a978cdd1' : '5ad8f36
 const BUNDLE_ID = (isProduction ? 'com.ctrlaltdeseat.ctrlpanel' : 'com.ctrlaltdeseat.ctrlpanel-dev')
 const DEVELOPER_ID = '3J63SJ6WJU'
 
+const outputPostfix = (isProduction ? '-prod' : '-dev')
+const outputExtension = (targetBrowser === 'safari' ? '.safariextension' : '')
+
 const iconSource = fs.readFileSync(`assets/logo${isProduction ? '' : '-dev'}.svg`)
 const actionIcon = WextIcons.action(iconSource, targetBrowser)
 const extensionIcon = WextIcons.extension(iconSource, targetBrowser, { shape: 'circle' })
@@ -73,7 +76,7 @@ module.exports = {
     popup: './source/popup.ts'
   },
   output: {
-    path: path.join(__dirname, 'distribution', (targetBrowser === 'safari' ? 'safari.safariextension' : targetBrowser)),
+    path: path.join(__dirname, 'distribution', `${targetBrowser}${outputPostfix}${outputExtension}`),
     filename: '[name].js'
   },
   node: restrictNodeStuff(['global']),
