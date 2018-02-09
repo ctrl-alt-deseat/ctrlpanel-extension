@@ -28,6 +28,10 @@ const iconSource = fs.readFileSync(`assets/logo${isProduction ? '' : '-dev'}.svg
 const actionIcon = WextIcons.action(iconSource, targetBrowser)
 const extensionIcon = WextIcons.extension(iconSource, targetBrowser, { shape: 'circle' })
 
+const currentGitRef = fs.readFileSync(path.join(__dirname, '.git/HEAD')).toString().replace('ref: ', '').trim()
+const currentGitSha = fs.readFileSync(path.join(__dirname, '.git', currentGitRef)).toString().trim()
+const githubPermaLink = `https://github.com/ctrl-alt-deseat/ctrlpanel-extension/tree/${currentGitSha}`
+
 const manifest = WextManifest[targetBrowser]({
   manifest_version: 2,
   name: (isProduction ? 'Ctrlpanel' : 'Ctrlpanel DEV'),
@@ -100,6 +104,7 @@ module.exports = {
     new WriteWebpackPlugin([
       ...extensionIcon.files,
       ...actionIcon.files,
+      { name: 'SOURCE_URL', data: Buffer.from(githubPermaLink) },
       { name: manifest.name, data: Buffer.from(manifest.content) }
     ]),
     new CopyWebpackPlugin([
