@@ -23,7 +23,7 @@
     "dev:firefox": "npm-run-all build:dev:firefox --parallel build:watch:firefox start:firefox",
     "release:chrome": "shipit chrome distribution/chrome-prod",
     "release:firefox": "shipit firefox distribution/firefox-prod",
-    "release:opera": "web-ext build --source-dir distribution/opera-prod --artifacts-dir web-ext-artifacts/opera && echo Manually upload the build artifact to addons.opera.com",
+    "release:opera": "shipit opera distribution/opera-prod",
     "release:safari": "echo Manually use the Safari Extension Builder to produce an .safariextz file",
     "release": "run-s build:prod release:*"
   },
@@ -38,7 +38,7 @@
   "devDependencies": {
     "@wext/icons": "^0.1.1",
     "@wext/manifest": "^0.2.1",
-    "@wext/shipit": "^0.1.1",
+    "@wext/shipit": "^0.1.2",
     "copy-webpack-plugin": "^4.3.1",
     "npm-run-all": "^4.1.2",
     "ts-loader": "^3.4.0",
