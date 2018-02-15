@@ -25,12 +25,9 @@ const errorContainer = unwrap(document.querySelector<HTMLDivElement>('div.error-
 const errorMessage = unwrap(document.querySelector<HTMLDivElement>('div.error-message'))
 const errorAppLink = unwrap(document.querySelector<HTMLAnchorElement>('div.error-app-link a'))
 
+const accountList = unwrap(document.querySelector<HTMLDivElement>('div.account-list'))
 const accountContainer = unwrap(document.querySelector<HTMLDivElement>('div.account-container'))
-const accountFavicon = unwrap(document.querySelector<HTMLImageElement>('img.account-favicon'))
-const accountLogin = unwrap(document.querySelector<HTMLDivElement>('div.account-login'))
-const accountHostname = unwrap(document.querySelector<HTMLDivElement>('div.account-hostname'))
-const accountHandle = unwrap(document.querySelector<HTMLDivElement>('div.account-handle'))
-const accountPassword = unwrap(document.querySelector<HTMLDivElement>('div.account-password'))
+const accountTemplate = unwrap(accountContainer.parentNode).removeChild(accountContainer)
 
 interface EmptyState {
   kind: 'empty'
@@ -51,13 +48,13 @@ interface ErrorState {
   message: string
 }
 
-interface AccountState {
-  kind: 'account'
+interface AccountsState {
+  kind: 'accounts'
   hostname: string
-  account: CtrlpanelExtension.AccountResult
+  accounts: CtrlpanelExtension.AccountResult[]
 }
 
-type State = EmptyState | LockedState | LoadingState | ErrorState | AccountState
+type State = EmptyState | LockedState | LoadingState | ErrorState | AccountsState
 
 const originalHeight = document.body.clientHeight
 
@@ -73,6 +70,23 @@ function upperCaseFirst (input: string) {
   return input.charAt(0).toUpperCase() + input.slice(1)
 }
 
+function renderAccount (data: CtrlpanelExtension.AccountResult) {
+  const container = accountTemplate.cloneNode(true) as HTMLDivElement
+  const favicon = unwrap(container.querySelector<HTMLImageElement>('img.account-favicon'))
+  const login = unwrap(container.querySelector<HTMLDivElement>('div.account-login'))
+  const hostname = unwrap(container.querySelector<HTMLDivElement>('div.account-hostname'))
+  const handle = unwrap(container.querySelector<HTMLDivElement>('div.account-handle'))
+  const password = unwrap(container.querySelector<HTMLDivElement>('div.account-password'))
+
+  hostname.textContent = upperCaseFirst(stripCommonPrefixes(data.hostname))
+  favicon.src = `https://api.ind3x.io/v1/domains/${data.hostname}/icon`
+  handle.textContent = data.handle
+  password.textContent = data.password.replace(/./g, BULLET)
+  login.addEventListener('click', () => fillAccount(data))
+
+  return container
+}
+
 let state: State = { kind: 'empty' }
 function render (newState?: State) {
   if (newState) state = newState
@@ -80,7 +94,7 @@ function render (newState?: State) {
   unlockContainer.style.display = (state.kind === 'locked' ? '' : 'none')
   loadingContainer.style.display = (state.kind === 'loading' ? '' : 'none')
   errorContainer.style.display = (state.kind === 'error' ? '' : 'none')
-  accountContainer.style.display = (state.kind === 'account' ? '' : 'none')
+  accountList.style.display = (state.kind === 'accounts' ? '' : 'none')
 
   unlockHostname.textContent = (state.kind === 'locked' ? upperCaseFirst(state.hostname) : NO_BREAK_SPACE)
   unlockFavicon.src = (state.kind === 'locked' ? `https://api.ind3x.io/v1/domains/${state.hostname}/icon` : EMPTY_IMAGE_SRC)
@@ -88,10 +102,10 @@ function render (newState?: State) {
 
   errorMessage.textContent = (state.kind === 'error' ? state.message : '')
 
-  accountHostname.textContent = (state.kind === 'account' ? upperCaseFirst(stripCommonPrefixes(state.account.hostname)) : NO_BREAK_SPACE)
-  accountFavicon.src = (state.kind === 'account' ? `https://api.ind3x.io/v1/domains/${state.account.hostname}/icon` : EMPTY_IMAGE_SRC)
-  accountHandle.textContent = (state.kind === 'account' ? state.account.handle : NO_BREAK_SPACE)
-  accountPassword.textContent = (state.kind === 'account' ? state.account.password.replace(/./g, BULLET) : NO_BREAK_SPACE)
+  accountList.innerHTML = ''
+  if (state.kind === 'accounts') {
+    state.accounts.forEach(acc => accountList.appendChild(renderAccount(acc)))
+  }
 
   if (newState && newState.kind === 'locked') {
     unlockInput.focus()
@@ -157,10 +171,6 @@ errorAppLink.addEventListener('click', async () => {
   hidePopup()
 })
 
-accountLogin.addEventListener('click', async () => {
-  if (state.kind === 'account') await fillAccount(state.account)
-})
-
 unlockForm.addEventListener('submit', async (ev) => {
   ev.preventDefault()
 
@@ -201,7 +211,7 @@ async function displayAccount () {
     return render({ kind: 'error', message: 'No account found' })
   }
 
-  render({ kind: 'account', hostname, account: accounts[0] })
+  render({ kind: 'accounts', hostname, accounts })
 }
 
 async function fillAccount (account: CtrlpanelExtension.AccountResult) {
