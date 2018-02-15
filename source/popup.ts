@@ -200,13 +200,15 @@ unlockForm.addEventListener('submit', async (ev) => {
 })
 
 async function displayAccounts (hostname: string) {
-  const accounts = await CtrlpanelExtension.getAccountsForHostname(hostname)
+  const cachedAccounts = await CtrlpanelExtension.getAccountsForHostname(hostname)
 
-  if (accounts.length > 0) {
-    render({ kind: 'accounts', hostname, accounts })
+  if (cachedAccounts.length > 0) {
+    render({ kind: 'accounts', hostname, accounts: cachedAccounts })
   }
 
   await CtrlpanelExtension.sync()
+
+  const accounts = await CtrlpanelExtension.getAccountsForHostname(hostname)
 
   if (accounts.length === 0) {
     return render({ kind: 'error', message: 'No account found' })
