@@ -193,7 +193,7 @@ unlockForm.addEventListener('submit', async (ev) => {
     throw err
   }
 
-  // The password was correct, cache it and remove it from the DOM now
+  // The password was correct, remove it from the DOM now
   unlockInput.value = ''
 
   await displayAccounts(hostname)
