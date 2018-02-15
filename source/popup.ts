@@ -94,28 +94,35 @@ function renderAccount (data: CtrlpanelExtension.AccountResult, availableFields:
   handleValue.textContent = data.handle
   passwordValue.textContent = data.password.replace(/./g, BULLET)
 
-  function copyWithIndication (el: HTMLSpanElement, value: string) {
-    copy(value)
+  const timeouts = new WeakMap<HTMLSpanElement, any>()
 
-    const text = el.textContent
+  function indicateSuccess (el: HTMLSpanElement, text: string) {
+    const id = timeouts.get(el)
+
+    function onTimeout () {
+      el.textContent = text
+      timeouts.delete(el)
+    }
+
+    if (id) clearTimeout(id)
     el.textContent = CHECKMARK
-    setTimeout(() => { el.textContent = text }, 2400)
+    timeouts.set(el, setTimeout(onTimeout, 2400))
   }
 
   if (availableFields.handle) {
     handleAction.textContent = 'fill'
-    handleAction.addEventListener('click', () => fillField(data, 'handle'))
+    handleAction.addEventListener('click', () => { fillField(data, 'handle'); indicateSuccess(handleAction, 'fill') })
   } else {
     handleAction.textContent = 'copy'
-    handleAction.addEventListener('click', () => copyWithIndication(handleAction, data.handle))
+    handleAction.addEventListener('click', () => { copy(data.handle); indicateSuccess(handleAction, 'copy') })
   }
 
   if (availableFields.password) {
     passwordAction.textContent = 'fill'
-    passwordAction.addEventListener('click', () => fillField(data, 'password'))
+    passwordAction.addEventListener('click', () => { fillField(data, 'password'); indicateSuccess(passwordAction, 'fill') })
   } else {
     passwordAction.textContent = 'copy'
-    passwordAction.addEventListener('click', () => copyWithIndication(passwordAction, data.password))
+    passwordAction.addEventListener('click', () => { copy(data.password); indicateSuccess(passwordAction, 'copy') })
   }
 
   if (availableFields.handle && availableFields.password) {
