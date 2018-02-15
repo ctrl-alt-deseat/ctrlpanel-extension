@@ -112,7 +112,8 @@
     }
 
     .account-handle,
-    .account-password {
+    .account-password,
+    .account-new-password {
       display: flex;
       font-size: 12px;
       margin-top: 6px;
@@ -141,6 +142,13 @@
       flex-shrink: 0;
       white-space: nowrap;
       color: #4682b4;
+      cursor: pointer;
+    }
+
+    .account-new-password {
+      justify-content: center;
+      color: white;
+      background-color: #4682b4;
       cursor: pointer;
     }
   </style>
@@ -175,7 +183,8 @@
         <div class="account-login" style="display: none;">Sign in</div>
       </div>
       <div class="account-handle"><span class="value">&nbsp;</span><span class="action"></span></div>
-      <div class="account-password"><span class="value">&nbsp;</span><span class="action"></span></div>
+      <div class="account-password" style="display: none;"><span class="value">&nbsp;</span><span class="action"></span></div>
+      <div class="account-new-password" style="display: none;">Create New Password</div>
     </div>
   </div>
 

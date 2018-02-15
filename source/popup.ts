@@ -78,54 +78,73 @@ function upperCaseFirst (input: string) {
   return input.charAt(0).toUpperCase() + input.slice(1)
 }
 
-function renderAccount (data: CtrlpanelExtension.AccountResult, availableFields: AvailableFields) {
+function renderAction (el: HTMLSpanElement, text: string, onClick: () => void) {
+  let timeoutId: any = null
+
+  function indicateSuccess () {
+    function onTimeout () {
+      el.textContent = text
+      timeoutId = null
+    }
+
+    if (timeoutId) clearTimeout(timeoutId)
+    el.textContent = CHECKMARK
+    timeoutId = setTimeout(onTimeout, 2400)
+  }
+
+  el.textContent = text
+  el.addEventListener('click', () => { onClick(); indicateSuccess() })
+}
+
+function renderAccount (data: CtrlpanelExtension.AccountResult, availableFields: AvailableFields, currentHostname: string) {
   const container = accountTemplate.cloneNode(true) as HTMLDivElement
   const favicon = unwrap(container.querySelector<HTMLImageElement>('img.account-favicon'))
   const login = unwrap(container.querySelector<HTMLDivElement>('div.account-login'))
   const hostname = unwrap(container.querySelector<HTMLDivElement>('div.account-hostname'))
-  const handleValue = unwrap(container.querySelector<HTMLDivElement>('div.account-handle .value'))
-  const handleAction = unwrap(container.querySelector<HTMLDivElement>('div.account-handle .action'))
-  const passwordValue = unwrap(container.querySelector<HTMLDivElement>('div.account-password .value'))
-  const passwordAction = unwrap(container.querySelector<HTMLDivElement>('div.account-password .action'))
+  const handleValue = unwrap(container.querySelector<HTMLSpanElement>('div.account-handle .value'))
+  const handleAction = unwrap(container.querySelector<HTMLSpanElement>('div.account-handle .action'))
+  const passwordContainer = unwrap(container.querySelector<HTMLDivElement>('div.account-password'))
+  const passwordValue = unwrap(container.querySelector<HTMLSpanElement>('div.account-password .value'))
+  const passwordAction = unwrap(container.querySelector<HTMLSpanElement>('div.account-password .action'))
+  const newPasswordButton = unwrap(container.querySelector<HTMLDivElement>('div.account-new-password'))
 
   hostname.textContent = upperCaseFirst(stripCommonPrefixes(data.hostname))
   favicon.src = `https://api.ind3x.io/v1/domains/${data.hostname}/icon`
 
-  handleValue.textContent = data.handle
-  passwordValue.textContent = data.password.replace(/./g, BULLET)
-
-  const timeouts = new WeakMap<HTMLSpanElement, any>()
-
-  function indicateSuccess (el: HTMLSpanElement, text: string) {
-    const id = timeouts.get(el)
-
-    function onTimeout () {
-      el.textContent = text
-      timeouts.delete(el)
-    }
-
-    if (id) clearTimeout(id)
-    el.textContent = CHECKMARK
-    timeouts.set(el, setTimeout(onTimeout, 2400))
-  }
+  const handle = (data.source === 'account' ? data.handle : data.email)
+  handleValue.textContent = handle
 
   if (availableFields.handle) {
-    handleAction.textContent = 'fill'
-    handleAction.addEventListener('click', () => { fillField(data, 'handle'); indicateSuccess(handleAction, 'fill') })
+    renderAction(handleAction, 'fill', () => fillField('handle', handle))
   } else {
-    handleAction.textContent = 'copy'
-    handleAction.addEventListener('click', () => { copy(data.handle); indicateSuccess(handleAction, 'copy') })
+    renderAction(handleAction, 'copy', () => copy(handle))
   }
 
-  if (availableFields.password) {
-    passwordAction.textContent = 'fill'
-    passwordAction.addEventListener('click', () => { fillField(data, 'password'); indicateSuccess(passwordAction, 'fill') })
+  if (data.source === 'account') {
+    passwordContainer.style.display = ''
+    passwordValue.textContent = data.password.replace(/./g, BULLET)
+
+    if (availableFields.password) {
+      renderAction(passwordAction, 'fill', () => fillField('password', data.password))
+    } else {
+      renderAction(passwordAction, 'copy', () => copy(data.password))
+    }
   } else {
-    passwordAction.textContent = 'copy'
-    passwordAction.addEventListener('click', () => { copy(data.password); indicateSuccess(passwordAction, 'copy') })
+    newPasswordButton.style.display = ''
+    newPasswordButton.addEventListener('click', async () => {
+      render({ kind: 'loading' })
+
+      try {
+        await CtrlpanelExtension.importInboxEntry(data.id, handle, currentHostname)
+        const accounts = await CtrlpanelExtension.getAccountsForHostname(currentHostname)
+        render({ kind: 'accounts', hostname: currentHostname, accounts, availableFields })
+      } catch (err) {
+        render({ kind: 'error', message: String(err) })
+      }
+    })
   }
 
-  if (availableFields.handle && availableFields.password) {
+  if (data.source === 'account' && availableFields.handle && availableFields.password) {
     login.style.display = ''
     login.addEventListener('click', () => fillAccount(data))
   }
@@ -150,7 +169,7 @@ function render (newState?: State) {
 
   accountList.innerHTML = ''
   if (state.kind === 'accounts') {
-    for (const acc of state.accounts) accountList.appendChild(renderAccount(acc, state.availableFields))
+    for (const acc of state.accounts) accountList.appendChild(renderAccount(acc, state.availableFields, state.hostname))
   }
 
   if (newState && newState.kind === 'locked') {
@@ -259,13 +278,15 @@ async function displayAccounts (hostname: string) {
   render({ kind: 'accounts', hostname, accounts, availableFields })
 }
 
-async function fillField (account: CtrlpanelExtension.AccountResult, field: keyof AvailableFields) {
+async function fillField (field: keyof AvailableFields, value: string) {
   try {
-    await wextTabs.executeScript({ code: `window.__ctrlpanel_extension_fill_field__(${JSON.stringify(field)}, ${JSON.stringify(account[field])})` })
+    await wextTabs.executeScript({ code: `window.__ctrlpanel_extension_fill_field__(${JSON.stringify(field)}, ${JSON.stringify(value)})` })
   } catch (_) { /* ignore */ }
 }
 
 async function fillAccount (account: CtrlpanelExtension.AccountResult) {
+  if (account.source === 'inbox') throw new Error('Cannot fill inbox entries')
+
   try {
     await wextTabs.executeScript({ code: `window.__ctrlpanel_extension_perform_login__(${JSON.stringify(account.handle)}, ${JSON.stringify(account.password)}, ${JSON.stringify(AUTO_SUBMIT)})` })
   } catch (_) {

@@ -6,6 +6,7 @@ import CtrlpanelCore, { Account, State } from '@ctrlpanel/core'
 import createInactivityTimer = require('inactivity-timer')
 import findAccountsForHostname = require('@ctrlpanel/find-accounts-for-hostname')
 import unwrap = require('ts-unwrap')
+import uuid = require('uuid/v4')
 import wextRuntime = require('@wext/runtime')
 import wextTabs = require('@wext/tabs')
 
@@ -84,9 +85,10 @@ async function getAccountsForHostname (hostname: string) {
   }
 
   const data = core.getParsedEntries(state)
-  const accounts = Object.keys(data.accounts).map(key => data.accounts[key])
+  const accounts = Object.keys(data.accounts).map(key => Object.assign({ id: key, source: 'account' }, data.accounts[key]))
+  const inbox = Object.keys(data.inbox).map(key => Object.assign({ id: key, source: 'inbox' }, data.inbox[key]))
 
-  return findAccountsForHostname(hostname, accounts)
+  return findAccountsForHostname(hostname, [...accounts, ...inbox])
 }
 
 async function seed (handle: string, secretKey: string, masterPassword: string) {
@@ -126,6 +128,23 @@ async function lock () {
   state = core.lock(state)
 }
 
+async function importInboxEntry (inboxEntryId: string, handle: string, hostname: string) {
+  if (state.kind === 'unlocked') {
+    state = await core.connect(state)
+  }
+
+  if (state.kind !== 'connected') {
+    throw new Error(`Unexpected state: ${state.kind}`)
+  }
+
+  const password = CtrlpanelCore.randomAccountPassword()
+  const accountData = { handle, hostname, password }
+
+  lockTimer.signal()
+  state = await core.deleteInboxEntry(state, inboxEntryId)
+  state = await core.createAccount(state, uuid(), accountData)
+}
+
 wextRuntime.onMessage.addListener((message, sender, sendResponse) => {
   Promise.resolve()
     .then<any, any>(() => {
@@ -138,6 +157,7 @@ wextRuntime.onMessage.addListener((message, sender, sendResponse) => {
         case 'seed': return seed(message.args[0], message.args[1], message.args[2])
         case 'signalActivity': return signalActivity()
         case 'lock': return lock()
+        case 'importInboxEntry': return importInboxEntry(message.args[0], message.args[1], message.args[2])
         default: throw new Error(`Unknown method: ${message.method}`)
       }
     })

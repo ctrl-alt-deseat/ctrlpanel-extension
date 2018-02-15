@@ -28,7 +28,11 @@ export function sync () {
   return remoteCall<void>('sync')
 }
 
-export interface AccountResult { handle: string, hostname: string, password: string, score: number }
+export type AccountResult = (
+  { id: string, source: 'account', handle: string, hostname: string, password: string, score: number } |
+  { id: string, source: 'inbox', email: string, hostname: string, score: number }
+)
+
 export function getAccountsForHostname (hostname: string) {
   return remoteCall<AccountResult[]>('getAccountsForHostname', hostname)
 }
@@ -43,4 +47,8 @@ export function signalActivity () {
 
 export function lock () {
   return remoteCall<void>('lock')
+}
+
+export function importInboxEntry (inboxEntryId: string, handle: string, hostname: string) {
+  return remoteCall<void>('importInboxEntry', inboxEntryId, handle, hostname)
 }
