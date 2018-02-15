@@ -1,13 +1,13 @@
 import { API_HOST, APP_HOST } from './lib/config'
-import stripCommonPrefixes from './lib/strip-common-prefixes'
 import waitForComplete from './lib/wait-for-complete'
 
-import CtrlpanelCore, { State } from '@ctrlpanel/core'
+import CtrlpanelCore, { Account, State } from '@ctrlpanel/core'
 
 import createInactivityTimer = require('inactivity-timer')
+import findAccountsForHostname = require('@ctrlpanel/find-accounts-for-hostname')
+import unwrap = require('ts-unwrap')
 import wextRuntime = require('@wext/runtime')
 import wextTabs = require('@wext/tabs')
-import unwrap = require('ts-unwrap')
 
 const core = new CtrlpanelCore(API_HOST)
 let state: State = core.init()
@@ -78,16 +78,15 @@ async function sync () {
   state = await core.sync(state)
 }
 
-async function getAccountForHostname (hostname: string) {
+async function getAccountsForHostname (hostname: string) {
   if (state.kind !== 'unlocked' && state.kind !== 'connected') {
     throw new Error(`Unexpected state: ${state.kind}`)
   }
 
   const data = core.getParsedEntries(state)
-  const search = stripCommonPrefixes(hostname)
   const accounts = Object.keys(data.accounts).map(key => data.accounts[key])
 
-  return accounts.find(acc => stripCommonPrefixes(acc.hostname) === search)
+  return findAccountsForHostname(hostname, accounts)
 }
 
 async function seed (handle: string, secretKey: string, masterPassword: string) {
@@ -135,7 +134,7 @@ wextRuntime.onMessage.addListener((message, sender, sendResponse) => {
         case 'needMasterPassword': return needMasterPassword()
         case 'unlock': return unlock(message.args[0])
         case 'sync': return sync()
-        case 'getAccountForHostname': return getAccountForHostname(message.args[0])
+        case 'getAccountsForHostname': return getAccountsForHostname(message.args[0])
         case 'seed': return seed(message.args[0], message.args[1], message.args[2])
         case 'signalActivity': return signalActivity()
         case 'lock': return lock()

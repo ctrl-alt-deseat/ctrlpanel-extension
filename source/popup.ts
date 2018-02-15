@@ -3,10 +3,10 @@
 import unwrap = require('ts-unwrap')
 
 import * as wextTabs from '@wext/tabs'
+import stripCommonPrefixes = require('@ctrlpanel/strip-common-prefixes')
 
 import { APP_HOST, AUTO_SUBMIT } from './lib/config'
 import * as CtrlpanelExtension from './lib/extension'
-import stripCommonPrefixes from './lib/strip-common-prefixes'
 
 const EMPTY_IMAGE_SRC = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
 const NO_BREAK_SPACE = String.fromCodePoint(0x00A0)
@@ -69,6 +69,10 @@ function hidePopup () {
   return (typeof safari === 'object' ? safari.self.hide() : window.close())
 }
 
+function upperCaseFirst (input: string) {
+  return input.charAt(0).toUpperCase() + input.slice(1)
+}
+
 let state: State = { kind: 'empty' }
 function render (newState?: State) {
   if (newState) state = newState
@@ -78,14 +82,14 @@ function render (newState?: State) {
   errorContainer.style.display = (state.kind === 'error' ? '' : 'none')
   accountContainer.style.display = (state.kind === 'account' ? '' : 'none')
 
-  unlockHostname.textContent = (state.kind === 'locked' ? (state.hostname.charAt(0).toUpperCase() + state.hostname.slice(1)) : NO_BREAK_SPACE)
+  unlockHostname.textContent = (state.kind === 'locked' ? upperCaseFirst(state.hostname) : NO_BREAK_SPACE)
   unlockFavicon.src = (state.kind === 'locked' ? `https://api.ind3x.io/v1/domains/${state.hostname}/icon` : EMPTY_IMAGE_SRC)
   unlockError.textContent = (state.kind === 'locked' ? (state.errorMessage || '') : '')
 
   errorMessage.textContent = (state.kind === 'error' ? state.message : '')
 
-  accountHostname.textContent = (state.kind === 'account' ? (state.hostname.charAt(0).toUpperCase() + state.hostname.slice(1)) : NO_BREAK_SPACE)
-  accountFavicon.src = (state.kind === 'account' ? `https://api.ind3x.io/v1/domains/${state.hostname}/icon` : EMPTY_IMAGE_SRC)
+  accountHostname.textContent = (state.kind === 'account' ? upperCaseFirst(stripCommonPrefixes(state.account.hostname)) : NO_BREAK_SPACE)
+  accountFavicon.src = (state.kind === 'account' ? `https://api.ind3x.io/v1/domains/${state.account.hostname}/icon` : EMPTY_IMAGE_SRC)
   accountHandle.textContent = (state.kind === 'account' ? state.account.handle : NO_BREAK_SPACE)
   accountPassword.textContent = (state.kind === 'account' ? state.account.password.replace(/./g, BULLET) : NO_BREAK_SPACE)
 
@@ -191,13 +195,13 @@ async function displayAccount () {
 
   const tab = (await wextTabs.query({ active: true, currentWindow: true }))[0]
   const hostname = stripCommonPrefixes(new URL(unwrap(tab.url)).hostname)
-  const account = await CtrlpanelExtension.getAccountForHostname(hostname)
+  const accounts = await CtrlpanelExtension.getAccountsForHostname(hostname)
 
-  if (!account) {
+  if (accounts.length === 0) {
     return render({ kind: 'error', message: 'No account found' })
   }
 
-  render({ kind: 'account', hostname, account })
+  render({ kind: 'account', hostname, account: accounts[0] })
 }
 
 async function fillAccount (account: CtrlpanelExtension.AccountResult) {
