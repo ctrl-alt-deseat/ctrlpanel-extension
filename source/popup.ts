@@ -163,7 +163,7 @@ async function onPopupOpen () {
     return render({ kind: 'locked', hostname })
   }
 
-  return displayAccount()
+  await displayAccounts(hostname)
 }
 
 errorAppLink.addEventListener('click', async () => {
@@ -178,14 +178,13 @@ unlockForm.addEventListener('submit', async (ev) => {
     throw new Error(`Unexpected state: ${state.kind}`)
   }
 
-  const { hostname } = state
-
   render({ kind: 'loading' })
 
-  const masterPassword = unlockInput.value
+  const tab = (await wextTabs.query({ active: true, currentWindow: true }))[0]
+  const hostname = stripCommonPrefixes(new URL(unwrap(tab.url)).hostname)
 
   try {
-    await CtrlpanelExtension.unlock(masterPassword)
+    await CtrlpanelExtension.unlock(unlockInput.value)
   } catch (err) {
     if (err.code === 'WRONG_MASTER_PASSWORD') {
       return render({ kind: 'locked', hostname, errorMessage: 'Wrong master password' })
@@ -197,15 +196,17 @@ unlockForm.addEventListener('submit', async (ev) => {
   // The password was correct, cache it and remove it from the DOM now
   unlockInput.value = ''
 
-  return displayAccount()
+  await displayAccounts(hostname)
 })
 
-async function displayAccount () {
-  await CtrlpanelExtension.sync()
-
-  const tab = (await wextTabs.query({ active: true, currentWindow: true }))[0]
-  const hostname = stripCommonPrefixes(new URL(unwrap(tab.url)).hostname)
+async function displayAccounts (hostname: string) {
   const accounts = await CtrlpanelExtension.getAccountsForHostname(hostname)
+
+  if (accounts.length > 0) {
+    render({ kind: 'accounts', hostname, accounts })
+  }
+
+  await CtrlpanelExtension.sync()
 
   if (accounts.length === 0) {
     return render({ kind: 'error', message: 'No account found' })
