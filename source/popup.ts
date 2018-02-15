@@ -3,6 +3,7 @@
 import unwrap = require('ts-unwrap')
 
 import * as wextTabs from '@wext/tabs'
+import copy = require('clipboard-copy')
 import stripCommonPrefixes = require('@ctrlpanel/strip-common-prefixes')
 
 import { APP_HOST, AUTO_SUBMIT } from './lib/config'
@@ -11,6 +12,7 @@ import * as CtrlpanelExtension from './lib/extension'
 const EMPTY_IMAGE_SRC = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
 const NO_BREAK_SPACE = String.fromCodePoint(0x00A0)
 const BULLET = String.fromCodePoint(0x2022)
+const CHECKMARK = String.fromCodePoint(0x2713)
 
 const unlockContainer = unwrap(document.querySelector<HTMLDivElement>('div.unlock-container'))
 const unlockForm = unwrap(document.querySelector<HTMLFormElement>('form.unlock-form'))
@@ -92,14 +94,28 @@ function renderAccount (data: CtrlpanelExtension.AccountResult, availableFields:
   handleValue.textContent = data.handle
   passwordValue.textContent = data.password.replace(/./g, BULLET)
 
+  function copyWithIndication (el: HTMLSpanElement, value: string) {
+    copy(value)
+
+    const text = el.textContent
+    el.textContent = CHECKMARK
+    setTimeout(() => { el.textContent = text }, 2400)
+  }
+
   if (availableFields.handle) {
     handleAction.textContent = 'fill'
     handleAction.addEventListener('click', () => fillField(data, 'handle'))
+  } else {
+    handleAction.textContent = 'copy'
+    handleAction.addEventListener('click', () => copyWithIndication(handleAction, data.handle))
   }
 
   if (availableFields.password) {
     passwordAction.textContent = 'fill'
     passwordAction.addEventListener('click', () => fillField(data, 'password'))
+  } else {
+    passwordAction.textContent = 'copy'
+    passwordAction.addEventListener('click', () => copyWithIndication(passwordAction, data.password))
   }
 
   if (availableFields.handle && availableFields.password) {
