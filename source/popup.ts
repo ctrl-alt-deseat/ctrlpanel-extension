@@ -29,6 +29,11 @@ const accountList = unwrap(document.querySelector<HTMLDivElement>('div.account-l
 const accountContainer = unwrap(document.querySelector<HTMLDivElement>('div.account-container'))
 const accountTemplate = unwrap(accountContainer.parentNode).removeChild(accountContainer)
 
+interface AvailableFields {
+  handle: boolean
+  password: boolean
+}
+
 interface EmptyState {
   kind: 'empty'
 }
@@ -52,6 +57,7 @@ interface AccountsState {
   kind: 'accounts'
   hostname: string
   accounts: CtrlpanelExtension.AccountResult[]
+  availableFields: AvailableFields
 }
 
 type State = EmptyState | LockedState | LoadingState | ErrorState | AccountsState
@@ -70,19 +76,36 @@ function upperCaseFirst (input: string) {
   return input.charAt(0).toUpperCase() + input.slice(1)
 }
 
-function renderAccount (data: CtrlpanelExtension.AccountResult) {
+function renderAccount (data: CtrlpanelExtension.AccountResult, availableFields: AvailableFields) {
   const container = accountTemplate.cloneNode(true) as HTMLDivElement
   const favicon = unwrap(container.querySelector<HTMLImageElement>('img.account-favicon'))
   const login = unwrap(container.querySelector<HTMLDivElement>('div.account-login'))
   const hostname = unwrap(container.querySelector<HTMLDivElement>('div.account-hostname'))
-  const handle = unwrap(container.querySelector<HTMLDivElement>('div.account-handle'))
-  const password = unwrap(container.querySelector<HTMLDivElement>('div.account-password'))
+  const handleValue = unwrap(container.querySelector<HTMLDivElement>('div.account-handle .value'))
+  const handleAction = unwrap(container.querySelector<HTMLDivElement>('div.account-handle .action'))
+  const passwordValue = unwrap(container.querySelector<HTMLDivElement>('div.account-password .value'))
+  const passwordAction = unwrap(container.querySelector<HTMLDivElement>('div.account-password .action'))
 
   hostname.textContent = upperCaseFirst(stripCommonPrefixes(data.hostname))
   favicon.src = `https://api.ind3x.io/v1/domains/${data.hostname}/icon`
-  handle.textContent = data.handle
-  password.textContent = data.password.replace(/./g, BULLET)
-  login.addEventListener('click', () => fillAccount(data))
+
+  handleValue.textContent = data.handle
+  passwordValue.textContent = data.password.replace(/./g, BULLET)
+
+  if (availableFields.handle) {
+    handleAction.textContent = 'fill'
+    handleAction.addEventListener('click', () => fillField(data, 'handle'))
+  }
+
+  if (availableFields.password) {
+    passwordAction.textContent = 'fill'
+    passwordAction.addEventListener('click', () => fillField(data, 'password'))
+  }
+
+  if (availableFields.handle && availableFields.password) {
+    login.style.display = ''
+    login.addEventListener('click', () => fillAccount(data))
+  }
 
   return container
 }
@@ -104,7 +127,7 @@ function render (newState?: State) {
 
   accountList.innerHTML = ''
   if (state.kind === 'accounts') {
-    state.accounts.forEach(acc => accountList.appendChild(renderAccount(acc)))
+    for (const acc of state.accounts) accountList.appendChild(renderAccount(acc, state.availableFields))
   }
 
   if (newState && newState.kind === 'locked') {
@@ -152,13 +175,6 @@ async function onPopupOpen () {
 
   const hostname = stripCommonPrefixes((new URL(tab.url)).hostname)
 
-  await wextTabs.executeScript({ file: '/filler.js' })
-  const hasLogin = (await wextTabs.executeScript({ code: `window.__ctrlpanel_extension_has_login__()` }))[0]
-
-  if (!hasLogin) {
-    return render({ kind: 'error', message: 'Not on sign in page' })
-  }
-
   if (await CtrlpanelExtension.needMasterPassword()) {
     return render({ kind: 'locked', hostname })
   }
@@ -200,10 +216,13 @@ unlockForm.addEventListener('submit', async (ev) => {
 })
 
 async function displayAccounts (hostname: string) {
+  await wextTabs.executeScript({ file: '/filler.js' })
+  const availableFields = (await wextTabs.executeScript({ code: `window.__ctrlpanel_extension_available_fields__()` }))[0] as AvailableFields
+
   const cachedAccounts = await CtrlpanelExtension.getAccountsForHostname(hostname)
 
   if (cachedAccounts.length > 0) {
-    render({ kind: 'accounts', hostname, accounts: cachedAccounts })
+    render({ kind: 'accounts', hostname, accounts: cachedAccounts, availableFields })
   }
 
   await CtrlpanelExtension.sync()
@@ -214,7 +233,13 @@ async function displayAccounts (hostname: string) {
     return render({ kind: 'error', message: 'No account found' })
   }
 
-  render({ kind: 'accounts', hostname, accounts })
+  render({ kind: 'accounts', hostname, accounts, availableFields })
+}
+
+async function fillField (account: CtrlpanelExtension.AccountResult, field: keyof AvailableFields) {
+  try {
+    await wextTabs.executeScript({ code: `window.__ctrlpanel_extension_fill_field__(${JSON.stringify(field)}, ${JSON.stringify(account[field])})` })
+  } catch (_) { /* ignore */ }
 }
 
 async function fillAccount (account: CtrlpanelExtension.AccountResult) {

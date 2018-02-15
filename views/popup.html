@@ -113,20 +113,35 @@
 
     .account-handle,
     .account-password {
+      display: flex;
       font-size: 12px;
-      text-align: center;
       margin-top: 6px;
-      padding: 2px 4px;
-      max-width: calc(100% - 8px);
+      padding: 2px 6px;
+      max-width: calc(100% - 12px);
       border-radius: 2px;
       background-color: #ebebeb;
+    }
+
+    .account-password .value {
+      color: #666;
+    }
+
+    .account-handle .value,
+    .account-password .value {
+      flex-grow: 1;
+      flex-shrink: 1;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    .account-password {
-      color: #666;
+    .account-handle .action,
+    .account-password .action {
+      flex-grow: 0;
+      flex-shrink: 0;
+      white-space: nowrap;
+      color: #4682b4;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -157,10 +172,10 @@
       <div class="account-header">
         <img class="account-favicon" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" width="16" height="16" />
         <div class="account-hostname">&nbsp;</div>
-        <div class="account-login">Sign in</div>
+        <div class="account-login" style="display: none;">Sign in</div>
       </div>
-      <div class="account-handle">&nbsp;</div>
-      <div class="account-password">&nbsp;</div>
+      <div class="account-handle"><span class="value">&nbsp;</span><span class="action"></span></div>
+      <div class="account-password"><span class="value">&nbsp;</span><span class="action"></span></div>
     </div>
   </div>
 

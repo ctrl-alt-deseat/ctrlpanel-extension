@@ -28,7 +28,7 @@
     "release": "run-s build:prod release:*"
   },
   "dependencies": {
-    "@buttercup/locust": "^0.5.0",
+    "@buttercup/locust": "github:LinusU/locust#c89d8ce",
     "@ctrlpanel/core": "^0.2.1",
     "@ctrlpanel/find-accounts-for-hostname": "^1.0.0",
     "@ctrlpanel/strip-common-prefixes": "^1.0.0",
