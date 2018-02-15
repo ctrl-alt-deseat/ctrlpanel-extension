@@ -28,10 +28,10 @@
     "release": "run-s build:prod release:*"
   },
   "dependencies": {
-    "@buttercup/locust": "github:LinusU/locust#c89d8ce",
     "@ctrlpanel/core": "^0.2.1",
     "@ctrlpanel/find-accounts-for-hostname": "^1.0.0",
     "@ctrlpanel/strip-common-prefixes": "^1.0.0",
+    "@linusu/locust": "^0.5.0-with-specific-field.0",
     "@wext/runtime": "^0.1.2",
     "@wext/tabs": "^0.1.3",
     "clipboard-copy": "^1.4.2",
