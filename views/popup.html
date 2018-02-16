@@ -143,6 +143,30 @@
       white-space: nowrap;
       color: #4682b4;
       cursor: pointer;
+      user-select: none;
+      -ms-user-select: none;
+      -moz-user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .account-handle .action.disabled,
+    .account-password .action.disabled {
+      color: #a9a9a9;
+      cursor: default;
+    }
+
+    .account-handle .action-separator,
+    .account-password .action-separator {
+      flex-grow: 0;
+      flex-shrink: 0;
+      white-space: nowrap;
+      color: #a9a9a9;
+      padding: 0 4px;
+      cursor: default;
+      user-select: none;
+      -ms-user-select: none;
+      -moz-user-select: none;
+      -webkit-user-select: none;
     }
 
     .account-new-password {
@@ -182,8 +206,8 @@
         <div class="account-hostname">&nbsp;</div>
         <div class="account-login" style="display: none;">Sign in</div>
       </div>
-      <div class="account-handle"><span class="value">&nbsp;</span><span class="action"></span></div>
-      <div class="account-password" style="display: none;"><span class="value">&nbsp;</span><span class="action"></span></div>
+      <div class="account-handle"><span class="value">&nbsp;</span><span class="action action-copy">copy</span><span class="action-separator">&#124;</span><span class="action action-fill">fill</span></div>
+      <div class="account-password" style="display: none;"><span class="value">&nbsp;</span><span class="action action-copy">copy</span><span class="action-separator">&#124;</span><span class="action action-fill">fill</span></div>
       <div class="account-new-password" style="display: none;">Create New Password</div>
     </div>
   </div>

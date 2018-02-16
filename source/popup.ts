@@ -78,8 +78,14 @@ function upperCaseFirst (input: string) {
   return input.charAt(0).toUpperCase() + input.slice(1)
 }
 
-function renderAction (el: HTMLSpanElement, text: string, onClick: () => void) {
+function renderAction (el: HTMLSpanElement, enabled: boolean, onClick: () => void) {
+  if (!enabled) {
+    el.classList.add('disabled')
+    return
+  }
+
   let timeoutId: any = null
+  const text = el.textContent
 
   function indicateSuccess () {
     function onTimeout () {
@@ -92,7 +98,6 @@ function renderAction (el: HTMLSpanElement, text: string, onClick: () => void) {
     timeoutId = setTimeout(onTimeout, 2400)
   }
 
-  el.textContent = text
   el.addEventListener('click', () => { onClick(); indicateSuccess() })
 }
 
@@ -102,10 +107,12 @@ function renderAccount (data: CtrlpanelExtension.AccountResult, availableFields:
   const login = unwrap(container.querySelector<HTMLDivElement>('div.account-login'))
   const hostname = unwrap(container.querySelector<HTMLDivElement>('div.account-hostname'))
   const handleValue = unwrap(container.querySelector<HTMLSpanElement>('div.account-handle .value'))
-  const handleAction = unwrap(container.querySelector<HTMLSpanElement>('div.account-handle .action'))
+  const handleCopyAction = unwrap(container.querySelector<HTMLSpanElement>('div.account-handle .action-copy'))
+  const handleFillAction = unwrap(container.querySelector<HTMLSpanElement>('div.account-handle .action-fill'))
   const passwordContainer = unwrap(container.querySelector<HTMLDivElement>('div.account-password'))
   const passwordValue = unwrap(container.querySelector<HTMLSpanElement>('div.account-password .value'))
-  const passwordAction = unwrap(container.querySelector<HTMLSpanElement>('div.account-password .action'))
+  const passwordCopyAction = unwrap(container.querySelector<HTMLSpanElement>('div.account-password .action-copy'))
+  const passwordFillAction = unwrap(container.querySelector<HTMLSpanElement>('div.account-password .action-fill'))
   const newPasswordButton = unwrap(container.querySelector<HTMLDivElement>('div.account-new-password'))
 
   hostname.textContent = upperCaseFirst(stripCommonPrefixes(data.hostname))
@@ -114,21 +121,15 @@ function renderAccount (data: CtrlpanelExtension.AccountResult, availableFields:
   const handle = (data.source === 'account' ? data.handle : data.email)
   handleValue.textContent = handle
 
-  if (availableFields.handle) {
-    renderAction(handleAction, 'fill', () => fillField('handle', handle))
-  } else {
-    renderAction(handleAction, 'copy', () => copy(handle))
-  }
+  renderAction(handleCopyAction, true, () => copy(handle))
+  renderAction(handleFillAction, availableFields.handle, () => fillField('handle', handle))
 
   if (data.source === 'account') {
     passwordContainer.style.display = ''
     passwordValue.textContent = data.password.replace(/./g, BULLET)
 
-    if (availableFields.password) {
-      renderAction(passwordAction, 'fill', () => fillField('password', data.password))
-    } else {
-      renderAction(passwordAction, 'copy', () => copy(data.password))
-    }
+    renderAction(passwordCopyAction, true, () => copy(data.password))
+    renderAction(passwordFillAction, availableFields.password, () => fillField('password', data.password))
   } else {
     newPasswordButton.style.display = ''
     newPasswordButton.addEventListener('click', async () => {
