@@ -1,4 +1,5 @@
-import { seed, signalActivity, lock } from './lib/extension'
+import { seed, signalActivity, lock, promptInboxEntry } from './lib/extension'
+import { getLoginTarget } from '@linusu/locust'
 
 if (process.env.TARGET_BROWSER === 'safari') require('@wext/tabs/safari-shim')
 
@@ -20,4 +21,30 @@ if (window.location.origin === process.env.APP_HOST) {
       lock()
     }
   })
+}
+
+window.__ctrlpanel_extension_available_fields__ = function () {
+  const loginTarget = getLoginTarget()
+
+  return {
+    handle: Boolean(loginTarget && loginTarget.usernameField),
+    password: Boolean(loginTarget && loginTarget.passwordField)
+  }
+}
+
+window.__ctrlpanel_extension_fill_field__ = function (field: 'handle' | 'password', value: string) {
+  getLoginTarget()[field === 'handle' ? 'fillUsername' : 'fillPassword'](value)
+}
+
+window.__ctrlpanel_extension_perform_login__ = function (handle: string, password: string, submit: boolean) {
+  getLoginTarget()[submit ? 'login' : 'enterDetails'](handle, password)
+}
+
+const loginTarget = getLoginTarget()
+
+if (loginTarget) {
+  let username = ''
+
+  loginTarget.on('valueChanged', ({ type, value }) => { if (type === 'username') username = value })
+  loginTarget.on('formSubmitted', () => promptInboxEntry(window.location.hostname, username))
 }

@@ -10,6 +10,8 @@ declare module '@linusu/locust' {
     enterDetails (username: string, password: string): Promise<void>
     fillUsername (username: string): Promise<void>
     fillPassword (password: string): Promise<void>
+    on (ev: 'valueChanged', fn: (info: { type: 'username' | 'password', value: string }) => void): void
+    on (ev: 'formSubmitted', fn: (info: { source: 'form' | 'submitButton' }) => void): void
     usernameField: HTMLInputElement | null
     passwordField: HTMLInputElement | null
   }

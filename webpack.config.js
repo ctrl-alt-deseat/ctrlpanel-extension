@@ -47,13 +47,10 @@ const manifest = WextManifest[targetBrowser]({
   description: 'One-click sign in for accounts in Ctrlpanel.io',
   homepage_url: 'https://www.ctrlpanel.io/',
 
-  permissions: (targetBrowser === 'safari' ? [
-    '<all_urls>'
-  ] : [
-    'activeTab',
-    `${API_HOST.replace(/:\d+$/, '')}/*`,
-    `${APP_HOST.replace(/:\d+$/, '')}/*`
-  ]),
+  permissions: [
+    '<all_urls>',
+    'activeTab'
+  ],
 
   background: {
     page: 'global.html'
@@ -66,9 +63,52 @@ const manifest = WextManifest[targetBrowser]({
   },
 
   content_scripts: [{
-    matches: [(targetBrowser === 'safari' ? '*://*/*' : `${APP_HOST.replace(/:\d+$/, '')}/*`)],
+    matches: ['*://*/*'],
     run_at: 'document_start',
-    js: ['content.js']
+    js: ['content.js'],
+    exclude_globs: [
+      'http://*.addthis.com/static/*',
+      'http://*.ak.fbcdn.net/*',
+      'http://*.atdmt.com/*',
+      'http://*.atwola.com/*',
+      'http://*.bizographics.com/collect/*',
+      'http://*.doubleclick.com/*',
+      'http://*.doubleclick.de/*',
+      'http://*.doubleclick.net/*',
+      'http://*.facebook.com/extern/*',
+      'http://*.facebook.com/plugins/*',
+      'http://*.facebook.com/widgets/*',
+      'http://*.stumbleupon.com/badge/*',
+      'http://*/*adframe*',
+      'http://*/*adserver*',
+      'http://ads.cnn.com/*',
+      'http://api.tweetmeme.com/*',
+      'http://engine.adzerk.net/*',
+      'http://platform.twitter.com/widgets/*',
+      'http://stats.complex.com/*',
+      'http://vitamine.networldmedia.net/*',
+      'https://*.addthis.com/static/*',
+      'https://*.ak.fbcdn.net/*',
+      'https://*.atdmt.com/*',
+      'https://*.atwola.com/*',
+      'https://*.bizographics.com/collect/*',
+      'https://*.doubleclick.com/*',
+      'https://*.doubleclick.de/*',
+      'https://*.doubleclick.net/*',
+      'https://*.facebook.com/extern/*',
+      'https://*.facebook.com/plugins/*',
+      'https://*.facebook.com/widgets/*',
+      'https://*.stumbleupon.com/badge/*',
+      'https://*/*adframe*',
+      'https://*/*adserver*',
+      'https://ads.cnn.com/*',
+      'https://api.tweetmeme.com/*',
+      'https://engine.adzerk.net/*',
+      'https://platform.twitter.com/widgets/*',
+      'https://plusone.google.com/*',
+      'https://stats.complex.com/*',
+      'https://vitamine.networldmedia.net/*'
+    ]
   }]
 })
 

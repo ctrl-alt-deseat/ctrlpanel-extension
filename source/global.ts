@@ -145,6 +145,10 @@ async function importInboxEntry (inboxEntryId: string, handle: string, hostname:
   state = await core.createAccount(state, uuid(), accountData)
 }
 
+async function promptInboxEntry (hostname: string, handle: string) {
+  console.log(hostname, handle)
+}
+
 wextRuntime.onMessage.addListener((message, sender, sendResponse) => {
   Promise.resolve()
     .then<any, any>(() => {
@@ -158,6 +162,7 @@ wextRuntime.onMessage.addListener((message, sender, sendResponse) => {
         case 'signalActivity': return signalActivity()
         case 'lock': return lock()
         case 'importInboxEntry': return importInboxEntry(message.args[0], message.args[1], message.args[2])
+        case 'promptInboxEntry': return promptInboxEntry(message.args[0], message.args[1])
         default: throw new Error(`Unknown method: ${message.method}`)
       }
     })

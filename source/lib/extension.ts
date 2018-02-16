@@ -52,3 +52,7 @@ export function lock () {
 export function importInboxEntry (inboxEntryId: string, handle: string, hostname: string) {
   return remoteCall<void>('importInboxEntry', inboxEntryId, handle, hostname)
 }
+
+export function promptInboxEntry (hostname: string, handle: string) {
+  return remoteCall<void>('promptInboxEntry', hostname, handle)
+}
