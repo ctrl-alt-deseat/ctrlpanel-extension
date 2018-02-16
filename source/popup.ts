@@ -175,6 +175,12 @@ function render (newState?: State) {
 
   if (newState && newState.kind === 'locked') {
     unlockInput.focus()
+
+    // ¯\_(ツ)_/¯
+    setTimeout(() => unlockInput.focus(), 60)
+    setTimeout(() => unlockInput.focus(), 80)
+    setTimeout(() => unlockInput.focus(), 100)
+    setTimeout(() => unlockInput.focus(), 120)
   }
 
   refreshPopupHeight()
