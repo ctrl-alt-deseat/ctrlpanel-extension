@@ -118,7 +118,7 @@ function renderAccount (data: CtrlpanelExtension.AccountResult, availableFields:
   hostname.textContent = upperCaseFirst(stripCommonPrefixes(data.hostname))
   favicon.src = `https://api.ind3x.io/v1/domains/${data.hostname}/icon`
 
-  const handle = (data.source === 'account' ? data.handle : data.email)
+  const handle = (data.source === 'inbox' ? data.email : data.handle)
   handleValue.textContent = handle
 
   renderAction(handleCopyAction, true, () => copy(handle))
@@ -136,7 +136,8 @@ function renderAccount (data: CtrlpanelExtension.AccountResult, availableFields:
       render({ kind: 'loading' })
 
       try {
-        await CtrlpanelExtension.importInboxEntry(data.id, handle, currentHostname)
+        if (data.source === 'inbox') await CtrlpanelExtension.importInboxEntry(data.id, handle, data.hostname)
+        if (data.source === 'new') await CtrlpanelExtension.createAccount(handle, currentHostname)
         const accounts = await CtrlpanelExtension.getAccountsForHostname(currentHostname)
         render({ kind: 'accounts', hostname: currentHostname, accounts, availableFields })
       } catch (err) {
@@ -267,22 +268,28 @@ unlockForm.addEventListener('submit', async (ev) => {
 async function displayAccounts (hostname: string) {
   await wextTabs.executeScript({ file: '/filler.js' })
   const availableFields = (await wextTabs.executeScript({ code: `window.__ctrlpanel_extension_available_fields__()` }))[0] as AvailableFields
+  const filledHandle = (await wextTabs.executeScript({ code: 'window.__ctrlpanel_extension_get_filled_handle__()' }))[0] as string
+  const newAccount = { source: 'new', hostname, handle: filledHandle } as CtrlpanelExtension.AccountResult
 
   const cachedAccounts = await CtrlpanelExtension.getAccountsForHostname(hostname)
 
   if (cachedAccounts.length > 0) {
     render({ kind: 'accounts', hostname, accounts: cachedAccounts, availableFields })
+  } else if (filledHandle) {
+    render({ kind: 'accounts', hostname, accounts: [newAccount], availableFields })
   }
 
   await CtrlpanelExtension.sync()
 
   const accounts = await CtrlpanelExtension.getAccountsForHostname(hostname)
 
-  if (accounts.length === 0) {
-    return render({ kind: 'error', message: 'No account found' })
+  if (accounts.length > 0) {
+    render({ kind: 'accounts', hostname, accounts, availableFields })
+  } else if (filledHandle) {
+    render({ kind: 'accounts', hostname, accounts: [newAccount], availableFields })
+  } else {
+    render({ kind: 'error', message: 'No account found' })
   }
-
-  render({ kind: 'accounts', hostname, accounts, availableFields })
 }
 
 async function fillField (field: keyof AvailableFields, value: string) {
@@ -293,6 +300,7 @@ async function fillField (field: keyof AvailableFields, value: string) {
 
 async function fillAccount (account: CtrlpanelExtension.AccountResult) {
   if (account.source === 'inbox') throw new Error('Cannot fill inbox entries')
+  if (account.source === 'new') throw new Error('Cannot fill accounts without passwords')
 
   try {
     await wextTabs.executeScript({ code: `window.__ctrlpanel_extension_perform_login__(${JSON.stringify(account.handle)}, ${JSON.stringify(account.password)}, ${JSON.stringify(AUTO_SUBMIT)})` })

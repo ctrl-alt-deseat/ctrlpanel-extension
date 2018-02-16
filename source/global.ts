@@ -130,6 +130,7 @@ async function lock () {
 
 async function importInboxEntry (inboxEntryId: string, handle: string, hostname: string) {
   if (state.kind === 'unlocked') {
+    lockTimer.signal()
     state = await core.connect(state)
   }
 
@@ -142,6 +143,23 @@ async function importInboxEntry (inboxEntryId: string, handle: string, hostname:
 
   lockTimer.signal()
   state = await core.deleteInboxEntry(state, inboxEntryId)
+  state = await core.createAccount(state, uuid(), accountData)
+}
+
+async function createAccount (handle: string, hostname: string) {
+  if (state.kind === 'unlocked') {
+    lockTimer.signal()
+    state = await core.connect(state)
+  }
+
+  if (state.kind !== 'connected') {
+    throw new Error(`Unexpected state: ${state.kind}`)
+  }
+
+  const password = CtrlpanelCore.randomAccountPassword()
+  const accountData = { handle, hostname, password }
+
+  lockTimer.signal()
   state = await core.createAccount(state, uuid(), accountData)
 }
 
@@ -158,6 +176,7 @@ wextRuntime.onMessage.addListener((message, sender, sendResponse) => {
         case 'signalActivity': return signalActivity()
         case 'lock': return lock()
         case 'importInboxEntry': return importInboxEntry(message.args[0], message.args[1], message.args[2])
+        case 'createAccount': return createAccount(message.args[0], message.args[1])
         default: throw new Error(`Unknown method: ${message.method}`)
       }
     })
