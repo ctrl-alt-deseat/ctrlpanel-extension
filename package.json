@@ -44,7 +44,7 @@
     "@wext/icons": "^0.1.1",
     "@wext/manifest": "^0.2.2",
     "@wext/shipit": "^0.1.2",
-    "copy-webpack-plugin": "^4.3.1",
+    "copy-webpack-plugin": "^4.5.0",
     "npm-run-all": "^4.1.2",
     "ts-loader": "^3.4.0",
     "tslint": "^5.9.1",
