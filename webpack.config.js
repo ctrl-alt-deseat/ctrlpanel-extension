@@ -73,6 +73,7 @@ const manifest = WextManifest[targetBrowser]({
 })
 
 module.exports = {
+  mode: (isProduction ? 'production' : 'development'),
   entry: {
     content: './source/content.ts',
     filler: './source/filler.ts',
@@ -93,7 +94,6 @@ module.exports = {
     ]
   },
   plugins: [
-    new webpack.optimize.ModuleConcatenationPlugin(),
     new webpack.DefinePlugin({
       'process.env.API_HOST': JSON.stringify(API_HOST),
       'process.env.APP_HOST': JSON.stringify(APP_HOST),
