@@ -6,7 +6,7 @@ Browser extension for loging in to websites using your [Ctrlpanel](https://www.c
 - Edge *(awaiting PBKDF2 Web Crypto API)*
 - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/ctrlpanel/)
 - [Opera](https://addons.opera.com/en-gb/extensions/details/ctrlpanel/) *(pending review)*
-- Safari *(pending review)*
+- [Safari](https://safari-extensions.apple.com/details/?id=com.ctrlaltdeseat.ctrlpanel-3J63SJ6WJU)
 
 ## Building the extension
 
