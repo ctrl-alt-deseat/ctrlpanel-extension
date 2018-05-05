@@ -19,5 +19,9 @@ if (window.location.origin === process.env.APP_HOST) {
     if (ev.data.method === 'ctrlpanel-extension-lock') {
       lock()
     }
+
+    if (ev.data.method === 'ctrlpanel-extension-ping') {
+      window.postMessage({ method: 'ctrlpanel-extension-pong' }, ev.origin)
+    }
   })
 }
