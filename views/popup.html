@@ -30,11 +30,6 @@
       justify-content: center;
     }
 
-    .unlock-form {
-      display: flex;
-      flex-direction: column;
-    }
-
     .unlock-header {
       justify-content: center;
     }
@@ -55,12 +50,19 @@
     .unlock-label {
       font-size: 10px;
       font-weight: 600;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
+      padding-left: 4px;
       text-transform: uppercase;
     }
 
+    .unlock-form {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
     .unlock-input {
-      padding: 3px 5px;
+      padding: 4px 5px 3px;
       font-size: 13px;
       font-family: "Menlo", monospace;
       border: 1px solid black;
@@ -69,6 +71,18 @@
 
     .unlock-input:focus {
       outline: none;
+    }
+
+    .unlock-chevron {
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: 5px 3px;
+      cursor: pointer;
+    }
+
+    .unlock-input:valid + svg.unlock-chevron polyline {
+      stroke: black;
     }
 
     .unlock-error {
@@ -149,8 +163,9 @@
       margin-top: 6px;
       padding: 5px;
       max-width: calc(100% - 12px);
-      border-radius: 2px;
+      background-color: white;
       border: 1px solid black;
+      border-radius: 2px;
     }
 
     .account-password .value {
@@ -215,7 +230,10 @@
     </div>
     <div style="height: 12px; width: 1px; flex-grow: 1;"></div>
     <div class="unlock-label">Master Password</div>
-    <form class="unlock-form"><input class="unlock-input" type="password" autofocus /></form>
+    <form class="unlock-form">
+      <input class="unlock-input" type="password" autofocus required />
+      <svg class="unlock-chevron" width="14" height="14"><polyline points="4,1.5 10,7 4,12.5" fill="none" stroke-width="1" stroke="#bbb"></polyline></svg>
+    </form>
     <div style="height: 12px; width: 1px; flex-grow: 1;"></div>
     <div class="unlock-error"></div>
   </div>

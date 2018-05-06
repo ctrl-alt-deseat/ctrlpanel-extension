@@ -18,6 +18,7 @@ const unlockContainer = unwrap(document.querySelector<HTMLDivElement>('div.unloc
 const unlockForm = unwrap(document.querySelector<HTMLFormElement>('form.unlock-form'))
 const unlockLogo = unwrap(document.querySelector<HTMLImageElement>('img.unlock-logo'))
 const unlockInput = unwrap(document.querySelector<HTMLInputElement>('input.unlock-input'))
+const unlockChevron = unwrap(document.querySelector<SVGElement>('svg.unlock-chevron'))
 const unlockError = unwrap(document.querySelector<HTMLDivElement>('div.unlock-error'))
 
 const loadingContainer = unwrap(document.querySelector<HTMLDivElement>('div.loading-container'))
@@ -234,9 +235,17 @@ unlockLogo.addEventListener('click', async () => {
   hidePopup()
 })
 
-unlockForm.addEventListener('submit', async (ev) => {
+unlockChevron.addEventListener('click', (ev) => {
   ev.preventDefault()
+  submitUnlockForm()
+})
 
+unlockForm.addEventListener('submit', (ev) => {
+  ev.preventDefault()
+  submitUnlockForm()
+})
+
+const submitUnlockForm = async () => {
   if (state.kind !== 'locked') {
     throw new Error(`Unexpected state: ${state.kind}`)
   }
@@ -260,7 +269,7 @@ unlockForm.addEventListener('submit', async (ev) => {
   const hostname = stripCommonPrefixes(new URL(unwrap(tab.url)).hostname)
 
   await displayAccounts(hostname)
-})
+}
 
 async function displayAccounts (hostname: string) {
   await wextTabs.executeScript({ file: '/filler.js' })
