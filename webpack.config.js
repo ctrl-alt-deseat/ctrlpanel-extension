@@ -70,7 +70,9 @@ const manifest = WextManifest[targetBrowser]({
     matches: [(targetBrowser === 'safari' ? '*://*/*' : `${APP_HOST.replace(/:\d+$/, '')}/*`)],
     run_at: 'document_start',
     js: ['content.js']
-  }]
+  }],
+
+  content_security_policy: ((targetBrowser === 'chrome' && isProduction === false) ? `script-src 'self' 'unsafe-eval'; object-src 'self'` : undefined)
 })
 
 module.exports = {
