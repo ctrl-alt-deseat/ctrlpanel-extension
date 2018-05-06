@@ -35,6 +35,10 @@
       flex-direction: column;
     }
 
+    .unlock-header {
+      justify-content: center;
+    }
+
     .unlock-header,
     .account-header {
       display: flex;
@@ -44,18 +48,27 @@
       font-size: 16px;
     }
 
-    .unlock-favicon,
-    .account-favicon {
-      margin-right: 6px;
+    .unlock-logo {
+      cursor: pointer;
     }
 
-    .unlock-hostname,
-    .account-hostname {
-      flex-grow: 1;
-      flex-shrink: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    .unlock-label {
+      font-size: 10px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .unlock-input {
+      padding: 3px 5px;
+      font-size: 13px;
+      font-family: "Menlo", monospace;
+      border: 1px solid black;
+      border-radius: 2px;
+    }
+
+    .unlock-input:focus {
+      outline: none;
     }
 
     .unlock-error {
@@ -99,32 +112,49 @@
       margin-bottom: 4px;
     }
 
-    .account-login {
-      padding: 2px 4px;
-      margin-left: 6px;
-      border-radius: 2px;
-      background-color: #4682b4;
-      color: white;
+    .account-favicon {
+      margin-right: 6px;
+    }
+
+    .account-hostname {
+      flex-grow: 1;
+      flex-shrink: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
       font-size: 12px;
-      font-weight: 100;
+      font-weight: 600;
+    }
+
+    .account-login {
+      padding: 4px 4px 0;
+      margin-left: 6px;
+      color: #00f;
+      font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
+      user-select: none;
+      -ms-user-select: none;
+      -moz-user-select: none;
+      -webkit-user-select: none;
     }
 
     .account-handle,
     .account-password,
     .account-new-password {
       display: flex;
-      font-size: 12px;
+      font-size: 10px;
+      font-family: "Menlo", monospace;
       margin-top: 6px;
-      padding: 2px 6px;
+      padding: 5px;
       max-width: calc(100% - 12px);
       border-radius: 2px;
-      background-color: #ebebeb;
+      border: 1px solid black;
     }
 
     .account-password .value {
-      color: #666;
+      color: black;
     }
 
     .account-handle .value,
@@ -141,7 +171,7 @@
       flex-grow: 0;
       flex-shrink: 0;
       white-space: nowrap;
-      color: #4682b4;
+      color: #00f;
       cursor: pointer;
       user-select: none;
       -ms-user-select: none;
@@ -171,8 +201,9 @@
 
     .account-new-password {
       justify-content: center;
+      background-color: #00f;
+      border-color: #00f;
       color: white;
-      background-color: #4682b4;
       cursor: pointer;
     }
   </style>
@@ -180,11 +211,11 @@
 <body>
   <div class="unlock-container" style="display: none;">
     <div class="unlock-header">
-      <img class="unlock-favicon" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" width="16" height="16" />
-      <div class="unlock-hostname">&nbsp;</div>
+      <img class="unlock-logo" src="logo-black.svg" width="20" height="20" />
     </div>
     <div style="height: 12px; width: 1px; flex-grow: 1;"></div>
-    <form class="unlock-form"><input class="unlock-input" type="password" placeholder="Master Password" autofocus /></form>
+    <div class="unlock-label">Master Password</div>
+    <form class="unlock-form"><input class="unlock-input" type="password" autofocus /></form>
     <div style="height: 12px; width: 1px; flex-grow: 1;"></div>
     <div class="unlock-error"></div>
   </div>

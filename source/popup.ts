@@ -16,8 +16,7 @@ const CHECKMARK = String.fromCodePoint(0x2713)
 
 const unlockContainer = unwrap(document.querySelector<HTMLDivElement>('div.unlock-container'))
 const unlockForm = unwrap(document.querySelector<HTMLFormElement>('form.unlock-form'))
-const unlockFavicon = unwrap(document.querySelector<HTMLImageElement>('img.unlock-favicon'))
-const unlockHostname = unwrap(document.querySelector<HTMLDivElement>('div.unlock-hostname'))
+const unlockLogo = unwrap(document.querySelector<HTMLImageElement>('img.unlock-logo'))
 const unlockInput = unwrap(document.querySelector<HTMLInputElement>('input.unlock-input'))
 const unlockError = unwrap(document.querySelector<HTMLDivElement>('div.unlock-error'))
 
@@ -42,7 +41,6 @@ interface EmptyState {
 
 interface LockedState {
   kind: 'locked'
-  hostname: string
   errorMessage?: string
 }
 
@@ -72,10 +70,6 @@ function refreshPopupHeight () {
 
 function hidePopup () {
   return (typeof safari === 'object' ? safari.self.hide() : window.close())
-}
-
-function upperCaseFirst (input: string) {
-  return input.charAt(0).toUpperCase() + input.slice(1)
 }
 
 function renderAction (el: HTMLSpanElement, enabled: boolean, onClick: () => void) {
@@ -115,7 +109,7 @@ function renderAccount (data: CtrlpanelExtension.AccountResult, availableFields:
   const passwordFillAction = unwrap(container.querySelector<HTMLSpanElement>('div.account-password .action-fill'))
   const newPasswordButton = unwrap(container.querySelector<HTMLDivElement>('div.account-new-password'))
 
-  hostname.textContent = upperCaseFirst(stripCommonPrefixes(data.hostname))
+  hostname.textContent = stripCommonPrefixes(data.hostname)
   favicon.src = `https://api.ind3x.io/v1/domains/${data.hostname}/icon`
 
   const handle = (data.source === 'inbox' ? data.email : data.handle)
@@ -163,8 +157,6 @@ function render (newState?: State) {
   errorContainer.style.display = (state.kind === 'error' ? '' : 'none')
   accountList.style.display = (state.kind === 'accounts' ? '' : 'none')
 
-  unlockHostname.textContent = (state.kind === 'locked' ? upperCaseFirst(state.hostname) : NO_BREAK_SPACE)
-  unlockFavicon.src = (state.kind === 'locked' ? `https://api.ind3x.io/v1/domains/${state.hostname}/icon` : EMPTY_IMAGE_SRC)
   unlockError.textContent = (state.kind === 'locked' ? (state.errorMessage || '') : '')
 
   errorMessage.textContent = (state.kind === 'error' ? state.message : '')
@@ -223,16 +215,21 @@ async function onPopupOpen () {
     return render({ kind: 'error', message: 'Not on sign in page' })
   }
 
-  const hostname = stripCommonPrefixes((new URL(tab.url)).hostname)
-
   if (await CtrlpanelExtension.needMasterPassword()) {
-    return render({ kind: 'locked', hostname })
+    return render({ kind: 'locked' })
   }
+
+  const hostname = stripCommonPrefixes((new URL(tab.url)).hostname)
 
   await displayAccounts(hostname)
 }
 
 errorAppLink.addEventListener('click', async () => {
+  await wextTabs.create({ active: true, url: `${APP_HOST}/` })
+  hidePopup()
+})
+
+unlockLogo.addEventListener('click', async () => {
   await wextTabs.create({ active: true, url: `${APP_HOST}/` })
   hidePopup()
 })
@@ -246,14 +243,11 @@ unlockForm.addEventListener('submit', async (ev) => {
 
   render({ kind: 'loading' })
 
-  const tab = (await wextTabs.query({ active: true, currentWindow: true }))[0]
-  const hostname = stripCommonPrefixes(new URL(unwrap(tab.url)).hostname)
-
   try {
     await CtrlpanelExtension.unlock(unlockInput.value)
   } catch (err) {
     if (err.code === 'WRONG_MASTER_PASSWORD') {
-      return render({ kind: 'locked', hostname, errorMessage: 'Wrong master password' })
+      return render({ kind: 'locked', errorMessage: 'Wrong master password' })
     }
 
     throw err
@@ -261,6 +255,9 @@ unlockForm.addEventListener('submit', async (ev) => {
 
   // The password was correct, remove it from the DOM now
   unlockInput.value = ''
+
+  const tab = (await wextTabs.query({ active: true, currentWindow: true }))[0]
+  const hostname = stripCommonPrefixes(new URL(unwrap(tab.url)).hostname)
 
   await displayAccounts(hostname)
 })

@@ -27,6 +27,7 @@ const outputExtension = (targetBrowser === 'safari' ? '.safariextension' : '')
 const iconSource = fs.readFileSync(`assets/logo${isProduction ? '' : '-dev'}.svg`)
 const actionIcon = WextIcons.action(iconSource, targetBrowser)
 const extensionIcon = WextIcons.extension(iconSource, targetBrowser, { shape: 'circle' })
+const blackLogo = iconSource.toString().replace(/\$PRIMARY_COLOR/g, 'black')
 
 const currentGitRef = fs.readFileSync(path.join(__dirname, '.git/HEAD')).toString().replace('ref: ', '').trim()
 const currentGitSha = fs.readFileSync(path.join(__dirname, '.git', currentGitRef)).toString().trim()
@@ -104,6 +105,7 @@ module.exports = {
     new WriteWebpackPlugin([
       ...extensionIcon.files,
       ...actionIcon.files,
+      { name: 'logo-black.svg', data: Buffer.from(blackLogo) },
       { name: 'SOURCE_URL', data: Buffer.from(githubPermaLink) },
       { name: manifest.name, data: Buffer.from(manifest.content) }
     ]),
