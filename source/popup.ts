@@ -18,7 +18,7 @@ const unlockContainer = unwrap(document.querySelector<HTMLDivElement>('div.unloc
 const unlockForm = unwrap(document.querySelector<HTMLFormElement>('form.unlock-form'))
 const unlockLogo = unwrap(document.querySelector<HTMLImageElement>('img.unlock-logo'))
 const unlockInput = unwrap(document.querySelector<HTMLInputElement>('input.unlock-input'))
-const unlockChevron = unwrap(document.querySelector<SVGElement>('svg.unlock-chevron'))
+const unlockChevron = unwrap(document.querySelector<HTMLDivElement>('div.unlock-chevron'))
 const unlockError = unwrap(document.querySelector<HTMLDivElement>('div.unlock-error'))
 
 const loadingContainer = unwrap(document.querySelector<HTMLDivElement>('div.loading-container'))
