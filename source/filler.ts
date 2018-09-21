@@ -1,4 +1,4 @@
-import { getLoginTarget } from '@linusu/locust'
+import { getLoginTarget } from '@buttercup/locust'
 
 window.__ctrlpanel_extension_available_fields__ = function () {
   const loginTarget = getLoginTarget()
