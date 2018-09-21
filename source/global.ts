@@ -1,7 +1,8 @@
 import { API_HOST, APP_HOST } from './lib/config'
 import waitForComplete from './lib/wait-for-complete'
 
-import CtrlpanelCore, { Account, State } from '@ctrlpanel/core'
+import CtrlpanelCore, { State } from '@ctrlpanel/core'
+import { FannyPack } from '@fanny-pack/core'
 
 import createInactivityTimer = require('inactivity-timer')
 import findAccountsForHostname = require('@ctrlpanel/find-accounts-for-hostname')
@@ -10,8 +11,24 @@ import uuid = require('uuid/v4')
 import wextRuntime = require('@wext/runtime')
 import wextTabs = require('@wext/tabs')
 
-const core = new CtrlpanelCore(API_HOST)
-let state: State = core.init()
+let storage: FannyPack = (
+  process.env.TARGET_BROWSER === 'safari'
+  ? new (require('@fanny-pack/browser'))('ctrlpanel')
+  : new (require('@fanny-pack/browser-extension'))('local', 'ctrlpanel')
+)
+
+try {
+  /* Remove old storage method */
+  window.localStorage.removeItem('fast-track')
+  window.indexedDB.deleteDatabase('vault')
+} catch {
+  /* ignore any errors */
+}
+
+const core = new CtrlpanelCore({ apiHost: API_HOST, storage, syncCredentialsToLocalStorage: true })
+
+let state: State
+core.init().then(result => { state = result })
 
 const lockTimer = createInactivityTimer('5m', () => {
   if (state.kind === 'empty') return
@@ -39,7 +56,7 @@ async function needCredentials () {
 
   await wextTabs.remove(tabId)
 
-  state = core.init(syncToken)
+  state = await core.init(syncToken)
 
   return false
 }
@@ -98,7 +115,7 @@ async function seed (handle: string, secretKey: string, masterPassword: string) 
   }
 
   if (state.kind === 'empty') {
-    state = await core.login(state, { handle, secretKey, masterPassword }, true)
+    state = await core.login(state, { handle, secretKey, masterPassword })
   }
 
   if (state.kind === 'locked') {

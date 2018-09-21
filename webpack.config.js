@@ -52,6 +52,7 @@ const manifest = WextManifest[targetBrowser]({
     '<all_urls>'
   ] : [
     'activeTab',
+    'storage',
     `${API_HOST.replace(/:\d+$/, '')}/*`,
     `${APP_HOST.replace(/:\d+$/, '')}/*`
   ]),
