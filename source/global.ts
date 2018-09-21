@@ -62,7 +62,7 @@ async function unlock (masterPassword: string) {
   }
 
   lockTimer.signal()
-  state = await core.unlock(state, masterPassword)
+  state = await core.unlock(state, { masterPassword })
 }
 
 async function sync () {
@@ -98,11 +98,11 @@ async function seed (handle: string, secretKey: string, masterPassword: string) 
   }
 
   if (state.kind === 'empty') {
-    state = await core.login(state, handle, secretKey, masterPassword, true)
+    state = await core.login(state, { handle, secretKey, masterPassword }, true)
   }
 
   if (state.kind === 'locked') {
-    state = await core.unlock(state, masterPassword)
+    state = await core.unlock(state, { masterPassword })
   }
 
   if (state.kind === 'unlocked') {

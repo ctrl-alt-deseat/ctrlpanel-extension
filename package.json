@@ -28,7 +28,7 @@
     "release": "run-s build:prod release:*"
   },
   "dependencies": {
-    "@ctrlpanel/core": "^0.2.3",
+    "@ctrlpanel/core": "^0.3.0",
     "@ctrlpanel/find-accounts-for-hostname": "^1.1.0",
     "@ctrlpanel/strip-common-prefixes": "^1.0.0",
     "@linusu/locust": "^0.5.0-with-specific-field.0",
