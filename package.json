@@ -30,7 +30,7 @@
   "dependencies": {
     "@buttercup/locust": "^0.9.0",
     "@ctrlpanel/core": "^0.4.4",
-    "@ctrlpanel/find-accounts-for-hostname": "^1.2.0",
+    "@ctrlpanel/find-accounts-for-hostname": "^1.3.0",
     "@ctrlpanel/strip-common-prefixes": "^1.0.0",
     "@fanny-pack/browser": "^1.0.0-beta.2",
     "@fanny-pack/browser-extension": "^1.0.0-beta.2",
