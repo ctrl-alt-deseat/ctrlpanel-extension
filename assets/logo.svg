@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="64px" height="64px" viewBox="5 5 54 54" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <path fill="$PRIMARY_COLOR" d="M 32 35 C 32 35, 46 52, 40 56 C 36 60, 28 60, 24 56 C 18 52, 32 35, 32 35" transform="rotate(  0 32 32)" />
-  <path fill="$PRIMARY_COLOR" d="M 32 35 C 32 35, 46 52, 40 56 C 36 60, 28 60, 24 56 C 18 52, 32 35, 32 35" transform="rotate( 72 32 32)" />
-  <path fill="$PRIMARY_COLOR" d="M 32 35 C 32 35, 46 52, 40 56 C 36 60, 28 60, 24 56 C 18 52, 32 35, 32 35" transform="rotate(144 32 32)" />
-  <path fill="$PRIMARY_COLOR" d="M 32 35 C 32 35, 46 52, 40 56 C 36 60, 28 60, 24 56 C 18 52, 32 35, 32 35" transform="rotate(216 32 32)" />
-  <path fill="$PRIMARY_COLOR" d="M 32 35 C 32 35, 46 52, 40 56 C 36 60, 28 60, 24 56 C 18 52, 32 35, 32 35" transform="rotate(288 32 32)" />
+<svg viewBox="0 0 2148 2148" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path transform="translate(143, 143)" fill="none" stroke="$PRIMARY_COLOR" stroke-width="334.4" stroke-miterlimit="10" d="M1592 1313.5C1459.9 1541.2 1213.5 1694.4 931.2 1694.4C509.6 1694.4 167.9 1352.7 167.9 931.1C167.9 509.5 509.6 167.8 931.2 167.8C1352.8 167.8 1694.5 509.5 1694.5 931.1H167.9" />
 </svg>

@@ -199,7 +199,7 @@ async function onPopupOpen () {
   render({ kind: 'empty' })
 
   if (await CtrlpanelExtension.needCredentials()) {
-    return render({ kind: 'error', message: 'Please log in to Ctrlpanel' })
+    return render({ kind: 'error', message: 'Please log in to eego' })
   }
 
   const tab = (await wextTabs.query({ active: true, currentWindow: true }))[0]

@@ -1,8 +1,9 @@
 {
-  "name": "@ctrlpanel/extension",
+  "name": "eego-extension",
   "version": "0.0.0",
   "license": "UNLICENSED",
   "repository": "ctrl-alt-deseat/ctrlpanel-extension",
+  "private": true,
   "scripts": {
     "test": "tslint --project tsconfig.json",
     "build:prod:chrome": "NODE_ENV=production TARGET_BROWSER=chrome webpack",

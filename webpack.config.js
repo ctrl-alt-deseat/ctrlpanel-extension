@@ -15,10 +15,10 @@ const isProduction = (unwrap(process.env.NODE_ENV) === 'production')
 const targetBrowser = unwrap(process.env.TARGET_BROWSER)
 
 const API_HOST = (isProduction ? 'https://api.ctrlpanel.io' : 'http://localhost:1834')
-const APP_HOST = (isProduction ? 'https://app.ctrlpanel.io' : 'http://localhost:1836')
+const APP_HOST = (isProduction ? 'https://web.eego.app' : 'http://localhost:1841')
 const AUTO_SUBMIT = (isProduction)
-const EXT_ID = (isProduction ? '4b209421-a51b-4556-88f1-a712a978cdd1' : '5ad8f361-be47-444c-b939-b2aa17f11cf2')
-const BUNDLE_ID = (isProduction ? 'com.ctrlaltdeseat.ctrlpanel' : 'com.ctrlaltdeseat.ctrlpanel-dev')
+const EXT_ID = (isProduction ? '7096a0a2-9934-4fc0-b7ce-9418ad5e9d99' : 'dffa1676-80f1-409e-90f0-7b7328af5719')
+const BUNDLE_ID = (isProduction ? 'com.ctrlaltdeseat.eego' : 'com.ctrlaltdeseat.eego-dev')
 const DEVELOPER_ID = '3J63SJ6WJU'
 
 const outputPostfix = (isProduction ? '-prod' : '-dev')
@@ -35,7 +35,7 @@ const githubPermaLink = `https://github.com/ctrl-alt-deseat/ctrlpanel-extension/
 
 const manifest = WextManifest[targetBrowser]({
   manifest_version: 2,
-  name: (isProduction ? 'Ctrlpanel' : 'Ctrlpanel DEV'),
+  name: (isProduction ? 'eego' : 'eego DEV'),
   version: utcVersion({ apple: (targetBrowser === 'safari') }),
   icons: extensionIcon.spec,
 
@@ -45,8 +45,8 @@ const manifest = WextManifest[targetBrowser]({
   },
 
   author: 'Ctrl Alt Deseat AB',
-  description: 'One-click sign in for accounts in Ctrlpanel.io',
-  homepage_url: 'https://www.ctrlpanel.io/',
+  description: 'One-click sign in for accounts in eego.app',
+  homepage_url: 'https://www.eego.app/',
 
   permissions: (targetBrowser === 'safari' ? [
     '<all_urls>'
@@ -62,7 +62,7 @@ const manifest = WextManifest[targetBrowser]({
   },
 
   browser_action: {
-    default_title: (isProduction ? 'Ctrlpanel' : 'Ctrlpanel DEV'),
+    default_title: (isProduction ? 'eego' : 'eego DEV'),
     default_popup: 'popup.html',
     default_icon: actionIcon.spec
   },
@@ -73,7 +73,7 @@ const manifest = WextManifest[targetBrowser]({
     js: ['content.js']
   }],
 
-  content_security_policy: ((targetBrowser === 'chrome' && isProduction === false) ? `script-src 'self' 'unsafe-eval'; object-src 'self'` : undefined)
+  content_security_policy: ((isProduction === false) ? `script-src 'self' 'unsafe-eval'; object-src 'self'` : undefined)
 })
 
 module.exports = {

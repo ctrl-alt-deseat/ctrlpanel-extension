@@ -17,14 +17,6 @@ let storage: FannyPack = (
   : new (require('@fanny-pack/browser-extension'))('local', 'ctrlpanel')
 )
 
-try {
-  /* Remove old storage method */
-  window.localStorage.removeItem('fast-track')
-  window.indexedDB.deleteDatabase('vault')
-} catch {
-  /* ignore any errors */
-}
-
 const core = new CtrlpanelCore({ apiHost: API_HOST, storage, syncCredentialsToLocalStorage: true })
 
 let state: State

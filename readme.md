@@ -1,12 +1,11 @@
-# Ctrlpanel Web Extension
+# eego web extension
 
-Browser extension for loging in to websites using your [Ctrlpanel](https://www.ctrlpanel.io/) account.
+Browser extension for loging in to websites using your [eego](https://www.eego.app/) account.
 
-- [Chrome](https://chrome.google.com/webstore/detail/ctrlpanel/nmjefmjehgomhbhpecnalkejcamiomdo)
+- Chrome *(pending submission)*
 - Edge *(awaiting PBKDF2 Web Crypto API)*
-- [Firefox](https://addons.mozilla.org/en-US/firefox/addon/ctrlpanel/)
-- [Opera](https://addons.opera.com/en-gb/extensions/details/ctrlpanel/) *(pending review)*
-- [Safari](https://safari-extensions.apple.com/details/?id=com.ctrlaltdeseat.ctrlpanel-3J63SJ6WJU)
+- Firefox *(pending submission)*
+- Safari *(pending development)*
 
 ## Building the extension
 
